@@ -12,4 +12,8 @@ extension Error {
         let error = self as NSError
         return error.domain == NSURLErrorDomain
     }
+    
+    var isCancellationError: Bool {
+        return (self as NSError).code == NSURLErrorCancelled
+    }
 }

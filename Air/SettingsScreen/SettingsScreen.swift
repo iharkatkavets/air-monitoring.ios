@@ -8,24 +8,95 @@
 import SwiftUI
 
 struct SettingsScreen: View {
-    @ObservedObject var viewModel: SettingsScreenViewModel
-    @FocusState var isFocused: Bool
-    
-    
-    var body: some View {
-        Form {
-            Section(header: Text("Server Configuration")) {
-                TextField("Server Domain, e.g. raspberrypi.local", text: $viewModel.serverDomain)
-                    .focused($isFocused)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.none)
-                    .keyboardType(.URL)
+    enum ActiveSheet: Int, Identifiable {
+        var id: Int { rawValue }
+        case maxAge
+        case storeInterval
+        
+        var title: String {
+            switch self {
+            case .maxAge: return "Max Age"
+            case .storeInterval: return "Store Interval"
             }
+        }
+        
+        var configuration: DurationPicker.Configuration {
+            switch self {
+            case .maxAge:
+                return DurationPicker.Configuration(numbers: 1...60, units: ["d"])
+            case .storeInterval:
+                return DurationPicker.Configuration(numbers: 1...60, units: ["s","m"])
+            }
+        }
+    }
+    
+    @ObservedObject var viewModel: SettingsScreenViewModel
+    @State private var activeSheet: ActiveSheet?
+
+    var body: some View {
+        ZStack {
+            Form {
+                Section(header: Text("Server Configuration")) {
+                    serverDomain
+                    maxAgeDuration
+                    storeInterval
+                }
+            }
+        }
+        .sheet(item: $activeSheet) { sheet in
+            DurationSelectionView(
+                title: sheet.title,
+                configuration: sheet.configuration,
+                cancelAction: { activeSheet = nil },
+                applyAction: { value in
+                    switch sheet {
+                    case .maxAge:
+                        viewModel.userDidSelectMaxAgeDuration(value)
+                    case .storeInterval:
+                        viewModel.userDidSelectStoreInterval(value)
+                    }
+                    activeSheet = nil
+                }
+            )
+            .presentationDetents([.height(360)])
+            .presentationDragIndicator(.visible)
         }
         .navigationTitle("Settings")
         .toolbarTitleDisplayMode(.inline)
-        .onTapGesture {
-            isFocused = false
+    }
+    
+    private var serverDomain: some View {
+        NavigationLink(destination: ServerDomainView(viewModel: viewModel.makeServerDomainViewModel())) {
+            HStack {
+                Text("Server Domain: ")
+                Spacer()
+                Text("\(viewModel.serverDomain)")
+            }
+            .foregroundStyle(viewModel.serverDomain.isEmpty ? .red : .primary)
+        }
+    }
+    
+    private var maxAgeDuration: some View {
+        HStack {
+            Text("Max Age Duration: ")
+            Spacer()
+            Button(action: {
+                activeSheet = .maxAge
+            }) {
+                Text("\(viewModel.maxAge)")
+            }
+        }
+    }
+    
+    private var storeInterval: some View {
+        HStack {
+            Text("Store Interval: ")
+            Spacer()
+            Button(action: {
+                activeSheet = .storeInterval
+            }) {
+                Text("\(viewModel.storeInterval)")
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ struct MeasurementsScreen: View {
     
     var body: some View {
         List {
-            ForEach(viewModel.measurements, id: \.id) { item in
+            ForEach(viewModel.measurements) { item in
                 MeasurementRow(item: item)
                     .listRowInsets(.init())
                     .listRowSeparator(.hidden)

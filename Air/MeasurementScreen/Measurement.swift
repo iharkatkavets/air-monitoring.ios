@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 struct Measurement: Decodable, Identifiable {
     let id: Int
     let sensor: String

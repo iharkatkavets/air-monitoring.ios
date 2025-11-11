@@ -11,13 +11,19 @@ import SwiftUI
 struct AirApp: App {
     @StateObject private var measurementsViewModel = MeasurementsScreenViewModel()
     @StateObject private var settingsViewModel = SettingsScreenViewModel()
-    
+    @StateObject private var chartsScreenViewModel = ChartsScreenViewModel()
+
     var body: some Scene {
         WindowGroup {
             TabView {
                 Tab("Measurements", systemImage: "house.fill") {
                     NavigationStack {
                         MeasurementsScreen(viewModel: measurementsViewModel)
+                    }
+                }
+                Tab("Charts", systemImage: "chart.xyaxis.line") {
+                    NavigationStack {
+                        ChartsScreen(viewModel: chartsScreenViewModel)
                     }
                 }
                 Tab("Settings", systemImage: "gearshape.fill") {
