@@ -13,27 +13,29 @@ struct ChartsScreen: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
-                MeasurementPMChart(
-                    xAxisTitle: "Particles Count",
-                    yAxisTitle: "Time",
-                    minValue: viewModel.particlesCountMinValue,
-                    maxValue: viewModel.particlesCountMaxValue,
-                    values: viewModel.particlesCount)
-                .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
+                MeasurementChart(viewModel: viewModel.particlesCountChartViewModel)
+                    .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
                 
-                MeasurementPMChart(
-                    xAxisTitle: "Mass Density",
-                    yAxisTitle: "Time",
-                    minValue: viewModel.massDensityMinValue,
-                    maxValue: viewModel.massDensityMaxValue,
-                    values: viewModel.massDensity)
-                .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
+                MeasurementChart(viewModel: viewModel.massDensityChartViewModel)
+                    .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
             }
             .padding(.horizontal)
         }
         .onAppear { viewModel.viewDidTriggerOnAppear() }
         .navigationTitle("Live Charts")
         .toolbarTitleDisplayMode(.inline)
+        .alert("Data Retreiving Error",
+               isPresented: .constant(viewModel.errorMessage != nil),
+               actions: {
+            Button("OK", role: .close) {
+                viewModel.errorMessage = nil
+            }
+            Button("Retry", role: .confirm) {
+                viewModel.fetchMeasurements()
+            }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
     
     private func halfHeight(_ length: CGFloat, _ axis: Axis) -> CGFloat {

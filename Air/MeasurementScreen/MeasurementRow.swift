@@ -45,11 +45,10 @@ struct MeasurementRow: View {
         }
         .padding(12)
         .background(
-            // Card-like row background
             RoundedRectangle(cornerRadius: 14)
                 .fill(Color(.secondarySystemBackground))
         )
-        .contentShape(Rectangle()) // full-row taps
+        .contentShape(Rectangle())
     }
 }
 

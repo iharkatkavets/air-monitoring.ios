@@ -7,11 +7,13 @@
 
 import Foundation
 
+typealias PMValue = String
+
 struct MeasurementMark: Identifiable {
     let id: Int
     let date: Date
     let value: Double
-    let pmValue: String
+    let pmValue: PMValue
 
     init(id: Int, date: Date, value: Double, pmValue: String) {
         self.id = id

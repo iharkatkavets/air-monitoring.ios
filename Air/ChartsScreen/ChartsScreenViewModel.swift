@@ -7,25 +7,19 @@
 
 import Combine
 import Foundation
+import os.log
 
 @MainActor
 final class ChartsScreenViewModel: ObservableObject {
-    @Published var particlesCount: [MeasurementMark] = []
-    @Published var particlesCountMinValue: Double = 0
-    @Published var particlesCountMaxValue: Double = 0
-    private var particlesCountMinValueInternal: Double = 1000
-    private var particlesCountMaxValueInternal: Double = 0
-    @Published var massDensity: [MeasurementMark] = []
-    @Published var massDensityMinValue: Double = 0
-    @Published var massDensityMaxValue: Double = 0
-    private var massDensityMinValueInternal: Double = 1000
-    private var massDensityMaxValueInternal: Double = 0
     var isLoading = false
     private var apiClient: APIClient
     @Published var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
     var loadingTask: Task<Void, Never>?
-    
+    let log = Logger()
+    let particlesCountChartViewModel = MeasurementChartViewModel()
+    let massDensityChartViewModel = MeasurementChartViewModel()
+
     init() {
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
     }
@@ -72,29 +66,23 @@ final class ChartsScreenViewModel: ObservableObject {
             switch v.sensor.lowercased() {
             case "particle_count":
                 if let pmValue = v.parameter {
-                    let padding = 5.0
-                    if v.value < particlesCountMinValueInternal {
-                        particlesCountMinValueInternal = v.value-padding
-                        particlesCountMinValue = particlesCountMinValueInternal
-                    }
-                    if v.value > particlesCountMaxValueInternal {
-                        particlesCountMaxValueInternal = v.value+padding
-                        particlesCountMaxValue = particlesCountMaxValueInternal
-                    }
-                    particlesCount.append(MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue))
+                    let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
+                    particlesCountChartViewModel.chartTitle = "Particles Count, \(v.unit)"
+                    particlesCountChartViewModel.latest[pmValue] = mark
+                    particlesCountChartViewModel.values.append(mark)
+                    particlesCountChartViewModel.xAxisTitle = "Particles Count, " + v.unit
+                    particlesCountChartViewModel.endDate = max(particlesCountChartViewModel.endDate, v.timestamp)
+                    log.info("particlesCount appended v.timestamp: \(v.timestamp)")
                 }
             case "mass_density":
                 if let pmValue = v.parameter {
-                    let padding = 5.0
-                    if v.value < massDensityMinValueInternal {
-                        massDensityMinValueInternal = v.value-padding
-                        massDensityMinValue = massDensityMinValueInternal
-                    }
-                    if v.value > massDensityMaxValueInternal {
-                        massDensityMaxValueInternal = v.value+padding
-                        massDensityMaxValue = massDensityMaxValueInternal
-                    }
-                    massDensity.append(MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue))
+                    let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
+                    massDensityChartViewModel.chartTitle = "Mass Density, \(v.unit)"
+                    massDensityChartViewModel.latest[pmValue] = mark
+                    massDensityChartViewModel.values.append(mark)
+                    massDensityChartViewModel.xAxisTitle = "Mass Density, " + v.unit
+                    massDensityChartViewModel.endDate = max(massDensityChartViewModel.endDate, v.timestamp)
+                    log.info("massDensity appended v.timestamp: \(v.timestamp)")
                 }
             default:
                 continue
@@ -108,8 +96,8 @@ final class ChartsScreenViewModel: ObservableObject {
         loadingTask?.cancel()
         await loadingTask?.value
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
-        particlesCount.removeAll()
-        massDensity.removeAll()
+        particlesCountChartViewModel.values.removeAll()
+        massDensityChartViewModel.values.removeAll()
         fetchMeasurements()
     }
     
