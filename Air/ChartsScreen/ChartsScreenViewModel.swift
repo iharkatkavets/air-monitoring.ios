@@ -67,20 +67,20 @@ final class ChartsScreenViewModel: ObservableObject {
             case "particle_count":
                 if let pmValue = v.parameter {
                     let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
-                    particlesCountChartViewModel.chartTitle = "Particles Count, \(v.unit)"
+                    particlesCountChartViewModel.chartTitle = "Number concentration, \(v.unit)"
                     particlesCountChartViewModel.latest[pmValue] = mark
                     particlesCountChartViewModel.values.append(mark)
-                    particlesCountChartViewModel.xAxisTitle = "Particles Count, " + v.unit
+                    particlesCountChartViewModel.xAxisTitle = v.unit
                     particlesCountChartViewModel.endDate = max(particlesCountChartViewModel.endDate, v.timestamp)
                     log.info("particlesCount appended v.timestamp: \(v.timestamp)")
                 }
             case "mass_density":
                 if let pmValue = v.parameter {
                     let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
-                    massDensityChartViewModel.chartTitle = "Mass Density, \(v.unit)"
+                    massDensityChartViewModel.chartTitle = "Mass concentration, \(v.unit)"
                     massDensityChartViewModel.latest[pmValue] = mark
                     massDensityChartViewModel.values.append(mark)
-                    massDensityChartViewModel.xAxisTitle = "Mass Density, " + v.unit
+                    massDensityChartViewModel.xAxisTitle = v.unit
                     massDensityChartViewModel.endDate = max(massDensityChartViewModel.endDate, v.timestamp)
                     log.info("massDensity appended v.timestamp: \(v.timestamp)")
                 }

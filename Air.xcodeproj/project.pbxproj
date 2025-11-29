@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		54F5B0DF2EDA529300A5FFA2 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 54F5B0DE2EDA529300A5FFA2 /* MarkdownUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		5420684F2EA433EE00CCBF78 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -53,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				54F5B0DF2EDA529300A5FFA2 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,6 +127,7 @@
 			);
 			name = Air;
 			packageProductDependencies = (
+				54F5B0DE2EDA529300A5FFA2 /* MarkdownUI */,
 			);
 			productName = Air;
 			productReference = 542068412EA433ED00CCBF78 /* Air.app */;
@@ -205,6 +211,9 @@
 			);
 			mainGroup = 542068382EA433ED00CCBF78;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				54F5B0DD2EDA529300A5FFA2 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 542068422EA433ED00CCBF78 /* Products */;
 			projectDirPath = "";
@@ -592,6 +601,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		54F5B0DD2EDA529300A5FFA2 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = exactVersion;
+				version = 2.4.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		54F5B0DE2EDA529300A5FFA2 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54F5B0DD2EDA529300A5FFA2 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 542068392EA433ED00CCBF78 /* Project object */;
 }

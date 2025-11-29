@@ -2,3 +2,6 @@
 xcuserdata/
 *.xcconfig
 Air/Project.xcconfig
+.build/
+.swiftpm/
+.DS_Store

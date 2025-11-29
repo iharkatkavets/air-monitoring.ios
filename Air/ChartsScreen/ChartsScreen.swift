@@ -6,17 +6,22 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct ChartsScreen: View {
     @ObservedObject var viewModel: ChartsScreenViewModel
-    
+    @State var isNumberConentrationInfoPresented: Bool = false
+    @State var isMassConcentrationInfoPresented: Bool = false
+
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
-                MeasurementChart(viewModel: viewModel.particlesCountChartViewModel)
+                MeasurementChart(viewModel: viewModel.particlesCountChartViewModel,
+                                 showInfo: $isNumberConentrationInfoPresented)
                     .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
                 
-                MeasurementChart(viewModel: viewModel.massDensityChartViewModel)
+                MeasurementChart(viewModel: viewModel.massDensityChartViewModel,
+                                 showInfo: $isMassConcentrationInfoPresented)
                     .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
             }
             .padding(.horizontal)
@@ -36,6 +41,20 @@ struct ChartsScreen: View {
         }, message: {
             Text(viewModel.errorMessage ?? "")
         })
+        .sheet(isPresented: $isNumberConentrationInfoPresented, content: {
+            infoView("number-concentration-info.md")
+        })
+        .sheet(isPresented: $isMassConcentrationInfoPresented, content: {
+            infoView("mass-concentration-info.md")
+        })
+    }
+    
+    
+    private func infoView(_ fileName: String) -> some View {
+        ScrollView {
+            Markdown(MarkdownContent(try! String(contentsOfFile: Bundle.main.path(forResource: fileName, ofType: nil)!, encoding: .utf8)))
+                .padding()
+        }
     }
     
     private func halfHeight(_ length: CGFloat, _ axis: Axis) -> CGFloat {

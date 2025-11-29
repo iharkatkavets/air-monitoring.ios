@@ -80,6 +80,10 @@ final class APIClientImpl: APIClient {
             let items: [Measurement]
         }
         do {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = .infinity
+            config.timeoutIntervalForResource = .infinity
+            let session = URLSession(configuration: config)
             let url = URL(string: "http://\(server)/api/measurements/stream")!
             let request = URLRequest(url: url)
             let (bytes, _) = try await session.bytes(for: request)
