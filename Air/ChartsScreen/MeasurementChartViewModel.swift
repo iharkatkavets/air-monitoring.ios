@@ -10,11 +10,27 @@ import SwiftUI
 
 @Observable
 final class MeasurementChartViewModel {
-    var chartTitle: String = ""
+    let chartTitle: String
     var xAxisTitle: String = ""
     var yAxisTitle: String = ""
     var values: [MeasurementMark] = []
-    var startDate: Date = .now
+    var startDate: Date = .now.addingTimeInterval(TimeInterval(-60))
     var endDate: Date = .now
     var latest: [PMValue: MeasurementMark] = [:]
+    
+    init(chartTitle: String) {
+        self.chartTitle = chartTitle
+    }
+    
+    func append(_ value: MeasurementMark) {
+        if value.date < endDate {
+            return
+        }
+        values.append(value)
+        latest[value.pmValue, default: value] = value
+        endDate = max(endDate, value.date)
+        let lowBound = endDate.addingTimeInterval(TimeInterval(-60))
+        startDate = max(lowBound, startDate)
+        values.removeAll { $0.date < startDate }
+    }
 }

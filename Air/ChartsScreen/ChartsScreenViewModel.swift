@@ -17,8 +17,8 @@ final class ChartsScreenViewModel: ObservableObject {
     var loadMoreButtonTitle: String = "Load more"
     var loadingTask: Task<Void, Never>?
     let log = Logger()
-    let particlesCountChartViewModel = MeasurementChartViewModel()
-    let massDensityChartViewModel = MeasurementChartViewModel()
+    let particlesCountChartViewModel = MeasurementChartViewModel(chartTitle: "Number concentration")
+    let massDensityChartViewModel = MeasurementChartViewModel(chartTitle: "Mass concentration")
 
     init() {
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
@@ -37,7 +37,6 @@ final class ChartsScreenViewModel: ObservableObject {
         loadingTask?.cancel()
         loadingTask = Task { [unowned self] in
             do {
-                print("start \(Date.now)")
                 guard !isLoading else {
                     return
                 }
@@ -67,22 +66,14 @@ final class ChartsScreenViewModel: ObservableObject {
             case "particle_count":
                 if let pmValue = v.parameter {
                     let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
-                    particlesCountChartViewModel.chartTitle = "Number concentration, \(v.unit)"
-                    particlesCountChartViewModel.latest[pmValue] = mark
-                    particlesCountChartViewModel.values.append(mark)
-                    particlesCountChartViewModel.xAxisTitle = v.unit
-                    particlesCountChartViewModel.endDate = max(particlesCountChartViewModel.endDate, v.timestamp)
-                    log.info("particlesCount appended v.timestamp: \(v.timestamp)")
+                    particlesCountChartViewModel.yAxisTitle = v.unit
+                    particlesCountChartViewModel.append(mark)
                 }
             case "mass_density":
                 if let pmValue = v.parameter {
                     let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
-                    massDensityChartViewModel.chartTitle = "Mass concentration, \(v.unit)"
-                    massDensityChartViewModel.latest[pmValue] = mark
-                    massDensityChartViewModel.values.append(mark)
-                    massDensityChartViewModel.xAxisTitle = v.unit
-                    massDensityChartViewModel.endDate = max(massDensityChartViewModel.endDate, v.timestamp)
-                    log.info("massDensity appended v.timestamp: \(v.timestamp)")
+                    massDensityChartViewModel.yAxisTitle = v.unit
+                    massDensityChartViewModel.append(mark)
                 }
             default:
                 continue

@@ -14,17 +14,31 @@ struct MeasurementChart: View {
     
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
-            HStack(spacing: 8) {
-                chartTitle
-                infoButton
-            }
+            chartHeader
             chart
         }
     }
     
+    var chartHeader: some View {
+        HStack(spacing: 8) {
+            yAxisTitle
+            Spacer()
+            chartTitle
+            Spacer()
+            infoButton
+        }
+    }
+    
+    var yAxisTitle: some View {
+        Text(viewModel.yAxisTitle)
+            .font(.footnote.weight(.regular))
+            .foregroundStyle(.primary.opacity(0.8))
+    }
+
     var chartTitle: some View {
         Text(viewModel.chartTitle)
-            .font(.subheadline)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary.opacity(0.8))
     }
     
     var infoButton: some View {
@@ -32,8 +46,12 @@ struct MeasurementChart: View {
             showInfo = true
         } label: {
             Image(systemName: "info.circle")
-                .font(.title2)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary.opacity(0.8))
+                .symbolRenderingMode(.hierarchical)
+                .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
     
     var chart: some View {
@@ -44,16 +62,16 @@ struct MeasurementChart: View {
             )
             .foregroundStyle(by: .value("Particle Size", item.pmValue))
             
-//                PointMark(
-//                    x: .value("Time", viewModel.latest[item.pmValue]!.date),
-//                    y: .value("Value", viewModel.latest[item.pmValue]!.value)
-//                )
-//                .annotation(position: .topLeading) {
-//                    Text(String(format: "%.0f", viewModel.latest[item.pmValue]!.value))
-//                        .font(.caption)
-//                        .padding(4)
-//                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 4))
-//                }
+//            PointMark(
+//                x: .value("Time", viewModel.latest[item.pmValue]!.date),
+//                y: .value("Value", viewModel.latest[item.pmValue]!.value)
+//            )
+//            .annotation(position: .topLeading) {
+//                Text(String(format: "%.0f", viewModel.latest[item.pmValue]!.value))
+//                    .font(.caption)
+//                    .padding(4)
+//                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 4))
+//            }
         }
         .chartXAxis {
             AxisMarks { value in
@@ -72,6 +90,5 @@ struct MeasurementChart: View {
         }
         .chartYScale(domain: .automatic(includesZero: false))
         .chartXScale(domain: viewModel.startDate...viewModel.endDate, type: .linear)
-        .chartScrollableAxes(.horizontal)
     }
 }
