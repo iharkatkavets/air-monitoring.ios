@@ -34,7 +34,7 @@ enum APIClientError: Swift.Error {
 protocol APIClient: Sendable {
     var server: ServerDomain { get }
     func fetchMeasurementsPage(_ cursor: NextPageCursor?) async throws(APIClientError) -> MeasurementsPage
-    func fetchMeasurementStream() async throws(APIClientError) -> AsyncThrowingStream<[Measurement], any Error>
+    func fetchMeasurementStream() async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error>
     func updateSetting(_ value: CustomStringConvertible, for key: ServerSettingKey) async throws(APIClientError)
 }
 
@@ -75,9 +75,9 @@ final class APIClientImpl: APIClient {
         }
     }
     
-    func fetchMeasurementStream() async throws(APIClientError) -> AsyncThrowingStream<[Measurement], any Error> {
+    func fetchMeasurementStream() async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error> {
         struct DataValue: Decodable {
-            let items: [Measurement]
+            let items: [MeasurementSSE]
         }
         do {
             let config = URLSessionConfiguration.default

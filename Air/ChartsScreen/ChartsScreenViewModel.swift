@@ -60,18 +60,18 @@ final class ChartsScreenViewModel: ObservableObject {
         }
     }
     
-    private func appendValues(_ values: [Measurement]) {
+    private func appendValues(_ values: [MeasurementSSE]) {
         for v in values {
             switch v.sensor.lowercased() {
             case "particle_count":
                 if let pmValue = v.parameter {
-                    let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
+                    let mark = MeasurementMark(date: v.timestamp, value: v.value, pmValue: pmValue)
                     particlesCountChartViewModel.yAxisTitle = v.unit
                     particlesCountChartViewModel.append(mark)
                 }
             case "mass_density":
                 if let pmValue = v.parameter {
-                    let mark = MeasurementMark(id: v.id, date: v.timestamp, value: v.value, pmValue: pmValue)
+                    let mark = MeasurementMark(date: v.timestamp, value: v.value, pmValue: pmValue)
                     massDensityChartViewModel.yAxisTitle = v.unit
                     massDensityChartViewModel.append(mark)
                 }

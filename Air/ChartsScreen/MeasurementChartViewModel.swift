@@ -14,7 +14,7 @@ final class MeasurementChartViewModel {
     var xAxisTitle: String = ""
     var yAxisTitle: String = ""
     var values: [MeasurementMark] = []
-    var startDate: Date = .now.addingTimeInterval(TimeInterval(-60))
+    var startDate: Date = .distantPast
     var endDate: Date = .now
     var latest: [PMValue: MeasurementMark] = [:]
     
@@ -30,7 +30,7 @@ final class MeasurementChartViewModel {
         latest[value.pmValue, default: value] = value
         endDate = max(endDate, value.date)
         let lowBound = endDate.addingTimeInterval(TimeInterval(-60))
-        startDate = max(lowBound, startDate)
+        startDate = max(lowBound, values.first!.date)
         values.removeAll { $0.date < startDate }
     }
 }

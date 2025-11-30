@@ -9,14 +9,13 @@ import Foundation
 
 typealias PMValue = String
 
-struct MeasurementMark: Identifiable {
-    let id: Int
+struct MeasurementMark: Hashable, Identifiable {
+    var id: Self { self }
     let date: Date
     let value: Double
     let pmValue: PMValue
 
-    init(id: Int, date: Date, value: Double, pmValue: String) {
-        self.id = id
+    init(date: Date, value: Double, pmValue: String) {
         self.date = date
         self.value = value
         self.pmValue = pmValue
