@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		54515A6E2EE7718700098E46 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 54515A6D2EE7718700098E46 /* Collections */; };
 		54F5B0DF2EDA529300A5FFA2 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 54F5B0DE2EDA529300A5FFA2 /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
@@ -35,11 +36,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		542068432EA433ED00CCBF78 /* Air */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Air;
-			sourceTree = "<group>";
-		};
 		542068512EA433EE00CCBF78 /* AirTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AirTests;
@@ -50,6 +46,11 @@
 			path = AirUITests;
 			sourceTree = "<group>";
 		};
+		548201EA2EECC3AD00FDE7AE /* Air */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Air;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				54515A6E2EE7718700098E46 /* Collections in Frameworks */,
 				54F5B0DF2EDA529300A5FFA2 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -81,7 +83,7 @@
 		542068382EA433ED00CCBF78 = {
 			isa = PBXGroup;
 			children = (
-				542068432EA433ED00CCBF78 /* Air */,
+				548201EA2EECC3AD00FDE7AE /* Air */,
 				542068512EA433EE00CCBF78 /* AirTests */,
 				5420685B2EA433EE00CCBF78 /* AirUITests */,
 				542068422EA433ED00CCBF78 /* Products */,
@@ -123,11 +125,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				542068432EA433ED00CCBF78 /* Air */,
+				548201EA2EECC3AD00FDE7AE /* Air */,
 			);
 			name = Air;
 			packageProductDependencies = (
 				54F5B0DE2EDA529300A5FFA2 /* MarkdownUI */,
+				54515A6D2EE7718700098E46 /* Collections */,
 			);
 			productName = Air;
 			productReference = 542068412EA433ED00CCBF78 /* Air.app */;
@@ -213,6 +216,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				54F5B0DD2EDA529300A5FFA2 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				54515A6C2EE7718700098E46 /* XCRemoteSwiftPackageReference "swift-collections" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 542068422EA433ED00CCBF78 /* Products */;
@@ -409,7 +413,7 @@
 		};
 		542068632EA433EE00CCBF78 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 542068432EA433ED00CCBF78 /* Air */;
+			baseConfigurationReferenceAnchor = 548201EA2EECC3AD00FDE7AE /* Air */;
 			baseConfigurationReferenceRelativePath = Project.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -446,7 +450,7 @@
 		};
 		542068642EA433EE00CCBF78 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 542068432EA433ED00CCBF78 /* Air */;
+			baseConfigurationReferenceAnchor = 548201EA2EECC3AD00FDE7AE /* Air */;
 			baseConfigurationReferenceRelativePath = Project.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -603,6 +607,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		54515A6C2EE7718700098E46 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.3.0;
+			};
+		};
 		54F5B0DD2EDA529300A5FFA2 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
@@ -614,6 +626,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		54515A6D2EE7718700098E46 /* Collections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54515A6C2EE7718700098E46 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = Collections;
+		};
 		54F5B0DE2EDA529300A5FFA2 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 54F5B0DD2EDA529300A5FFA2 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;

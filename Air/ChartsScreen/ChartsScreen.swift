@@ -7,28 +7,56 @@
 
 import SwiftUI
 import MarkdownUI
+import Collections
 
 struct ChartsScreen: View {
     @ObservedObject var viewModel: ChartsScreenViewModel
-    @State var isNumberConentrationInfoPresented: Bool = false
-    @State var isMassConcentrationInfoPresented: Bool = false
+    @State var isNumberConentrationInfoPresented = false
+    @State var isMassConcentrationInfoPresented = false
+    @State var toobarButtonRect: CGRect = .zero
+    @State private var listHeight: CGFloat = 0
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 32) {
-                MeasurementChart(viewModel: viewModel.particlesCountChartViewModel,
-                                 showInfo: $isNumberConentrationInfoPresented)
-                    .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
-                
-                MeasurementChart(viewModel: viewModel.massDensityChartViewModel,
-                                 showInfo: $isMassConcentrationInfoPresented)
-                    .containerRelativeFrame(.vertical, alignment: .top, halfHeight)
+        List(viewModel.sensors, id: \.0) { t in
+            Section(t.1) {
+                ChartsGroupView(
+                    spacing: 32,
+                    height: listHeight/2,
+                    viewModel: t.3)
+                .frame(height: CGFloat(t.2)*listHeight/2)
+                .padding(.top, 16)
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
-            .padding(.horizontal)
         }
+        .scrollIndicators(.hidden)
+        .listSectionSpacing(0)
+        .edgesIgnoringSafeArea(.horizontal)
+        .background(
+            GeometryReader { geo in
+                Color.clear
+                    .onChange(of: geo.size.height, initial: true) { _, newValue in
+                        listHeight = newValue
+                    }
+            }
+        )
+        .listStyle(.plain)
         .onAppear { viewModel.viewDidTriggerOnAppear() }
         .navigationTitle("Live Charts")
         .toolbarTitleDisplayMode(.inline)
+        .toolbar(content: {
+            ToolbarItem {
+                Button(action: viewModel.userDidPressAddSensor) {
+                    Image(systemName: "plus")
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $viewModel.sensorsListPopupIsPresented, attachmentAnchor: .point(.top), arrowEdge: .top) {
+                    SelectableSensorsListView(viewModel: viewModel.sensorsListPopupViewModel)
+                        .presentationCompactAdaptation(.popover)
+                        .frame(width: 300, height: 400)
+                }
+            }
+        })
         .alert("Data Retreiving Error",
                isPresented: .constant(viewModel.errorMessage != nil),
                actions: {
@@ -36,7 +64,7 @@ struct ChartsScreen: View {
                 viewModel.errorMessage = nil
             }
             Button("Retry", role: .confirm) {
-                viewModel.fetchMeasurements()
+//                viewModel.fetchMeasurements()
             }
         }, message: {
             Text(viewModel.errorMessage ?? "")
@@ -57,8 +85,11 @@ struct ChartsScreen: View {
         }
     }
     
-    private func halfHeight(_ length: CGFloat, _ axis: Axis) -> CGFloat {
-        (length-32) * 0.5
+    private func heightForGroupOfCharts(_ count: Int) -> (CGFloat, Axis) -> CGFloat {
+        let count = CGFloat(count)
+        return { length, axis in
+            count * (length-32) * 0.5
+        }
     }
     
     @ViewBuilder

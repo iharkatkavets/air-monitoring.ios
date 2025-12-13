@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct MeasurementsScreen: View {
-    @ObservedObject var viewModel: MeasurementsScreenViewModel
+    let title: String
+    let viewModel: MeasurementsScreenViewModel
     
     var body: some View {
         List {
@@ -30,7 +31,7 @@ struct MeasurementsScreen: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(.clear)
-        .navigationTitle("Measurements")
+        .navigationTitle(title)
         .toolbarTitleDisplayMode(.inline)
         .task {
             viewModel.fetchNextPage()
@@ -76,5 +77,7 @@ struct MeasurementsScreen: View {
 }
 
 #Preview {
-    MeasurementsScreen(viewModel: MeasurementsScreenViewModel())
+    MeasurementsScreen(
+        title: "sps30.pizero",
+        viewModel: MeasurementsScreenViewModel("sps30.pizero"))
 }

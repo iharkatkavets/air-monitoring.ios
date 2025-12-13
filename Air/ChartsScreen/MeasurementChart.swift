@@ -10,7 +10,7 @@ import Charts
 
 struct MeasurementChart: View {
     var viewModel: MeasurementChartViewModel
-    @Binding var showInfo: Bool
+//    @Binding var showInfo: Bool
     
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
@@ -43,7 +43,7 @@ struct MeasurementChart: View {
     
     var infoButton: some View {
         Button {
-            showInfo = true
+//            showInfo = true
         } label: {
             Image(systemName: "info.circle")
                 .font(.subheadline.weight(.semibold))
@@ -60,30 +60,10 @@ struct MeasurementChart: View {
                 x: .value(viewModel.xAxisTitle, item.date),
                 y: .value(viewModel.yAxisTitle, item.value)
             )
-            .foregroundStyle(by: .value("Particle Size", item.pmValue))
-            
-//            PointMark(
-//                x: .value("Time", viewModel.latest[item.pmValue]!.date),
-//                y: .value("Value", viewModel.latest[item.pmValue]!.value)
-//            )
-//            .annotation(position: .topLeading) {
-//                Text(String(format: "%.0f", viewModel.latest[item.pmValue]!.value))
-//                    .font(.caption)
-//                    .padding(4)
-//                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 4))
-//            }
+            .foregroundStyle(by: .value("", item.param))
         }
         .chartXAxis {
-            AxisMarks { value in
-                AxisValueLabel(centered: false) {
-                    if let date = value.as(Date.self) {
-                        Text(date.formatted(.dateTime.hour().minute().second()))
-                    }
-                }
-                AxisTick(stroke: StrokeStyle(lineWidth: 1))
-                    .foregroundStyle(Color.gray)
-                AxisGridLine(centered: false).foregroundStyle(.gray)
-            }
+            AxisMarks(values: .automatic(desiredCount: 1))
         }
         .chartYAxis {
             AxisMarks(position: .leading)

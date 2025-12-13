@@ -8,93 +8,66 @@
 import Combine
 import Foundation
 import os.log
+import Collections
 
 @MainActor
 final class ChartsScreenViewModel: ObservableObject {
     var isLoading = false
-    private var apiClient: APIClient
+    private lazy var apiClient = APIClientImpl(server: AppSettings.serverDomain)
     @Published var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
-    var loadingTask: Task<Void, Never>?
     let log = Logger()
-    let particlesCountChartViewModel = MeasurementChartViewModel(chartTitle: "Number concentration")
-    let massDensityChartViewModel = MeasurementChartViewModel(chartTitle: "Mass concentration")
+    @Published var sensorsListPopupIsPresented: Bool = false
+    lazy var sensorsListPopupViewModel =
+    SelectableSensorsListViewModel(onError: { [weak self] in
+        self?.errorMessage = $0.message
+    }, onSelectSensors: { [weak self]  in
+        self?.userDidSelectSensors($0)
+    })
+    @Published var sensors: [(UUID, SensorID, Int, ChartsGroupViewModel)] = []
 
     init() {
-        apiClient = APIClientImpl(server: AppSettings.serverDomain)
     }
     
     func viewDidTriggerOnAppear() {
-        if loadingTask == nil {
-            fetchMeasurements()
-        }
-        else if apiClient.server != AppSettings.serverDomain {
-            Task { await refresh() }
-        }
-    }
-    
-    func fetchMeasurements() {
-        loadingTask?.cancel()
-        loadingTask = Task { [unowned self] in
-            do {
-                guard !isLoading else {
-                    return
-                }
-                defer {
-                    isLoading = false
-                }
-                try Task.checkCancellation()
-                errorMessage = nil
-                isLoading = true
-                for try await measurements in try await apiClient.fetchMeasurementStream() {
-                    try Task.checkCancellation()
-                    appendValues(measurements)
-                }
-            }
-            catch {
-                if error.isCancellationError {
-                    return
-                }
-                errorMessage = (error as? APIClientError)?.message
-            }
-        }
-    }
-    
-    private func appendValues(_ values: [MeasurementSSE]) {
-        for v in values {
-            switch v.sensor.lowercased() {
-            case "particle_count":
-                if let pmValue = v.parameter {
-                    let mark = MeasurementMark(date: v.timestamp, value: v.value, pmValue: pmValue)
-                    particlesCountChartViewModel.yAxisTitle = v.unit
-                    particlesCountChartViewModel.append(mark)
-                }
-            case "mass_density":
-                if let pmValue = v.parameter {
-                    let mark = MeasurementMark(date: v.timestamp, value: v.value, pmValue: pmValue)
-                    massDensityChartViewModel.yAxisTitle = v.unit
-                    massDensityChartViewModel.append(mark)
-                }
-            default:
-                continue
-            }
+        guard sensors.isEmpty else {
+            return
         }
         
+        for config in AppSettings.sensors {
+            sensors.append(
+                (UUID(), config.id, config.measurements.count, ChartsGroupViewModel(config.id, config.measurements))
+            )
+        }
     }
     
     func refresh() async {
         errorMessage = nil
-        loadingTask?.cancel()
-        await loadingTask?.value
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
-        particlesCountChartViewModel.values.removeAll()
-        massDensityChartViewModel.values.removeAll()
-        fetchMeasurements()
     }
     
     func userDidPressTryAgain() {
         errorMessage = nil
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
-        fetchMeasurements()
+    }
+    
+    func userDidPressAddSensor() {
+        sensorsListPopupIsPresented = true
+    }
+    
+    private func userDidSelectSensors(_ list: [(SensorID, SensorName, [Measurement])]) {
+        sensorsListPopupIsPresented = false
+        for (id, _, measurements) in list {
+            sensors.append((UUID(), id, measurements.count, ChartsGroupViewModel(id, measurements)))
+        }
+        
+        Task {
+            var config = [AppSettings.SensorConfig]()
+            for (id, name, measurements) in list {
+                config.append(.init(id: id, name: name, measurements: measurements))
+            }
+            AppSettings.sensors += config
+        }
     }
 }
+

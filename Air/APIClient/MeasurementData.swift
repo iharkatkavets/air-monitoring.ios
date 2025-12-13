@@ -7,10 +7,10 @@
 
 import Foundation
 
-
-struct Measurement: Decodable, Identifiable {
+struct MeasurementData: Decodable, Identifiable {
     let id: Int
-    let sensor: String
+    let sensorName: String
+    let measurement: String
     let parameter: String?
     let value: Double
     let unit: String
@@ -18,22 +18,23 @@ struct Measurement: Decodable, Identifiable {
     let createdAt: Date
     
     private enum CodingKeys: String, CodingKey {
-        case id, sensor, parameter, value, unit, timestamp
+        case id, parameter, value, unit, timestamp, measurement
         case createdAt = "created_at"
+        case sensorName = "sensor_name"
     }
 }
 
 struct MeasurementSSE: Decodable, Hashable, Identifiable {
     var id: Self { self }
-    let sensor: String
+    let sensorName: String
+    let measurement: String
     let parameter: String?
     let value: Double
     let unit: String
     let timestamp: Date
-    let createdAt: Date
     
     private enum CodingKeys: String, CodingKey {
-        case sensor, parameter, value, unit, timestamp
-        case createdAt = "created_at"
+        case parameter, value, unit, timestamp, measurement
+        case sensorName = "sensor_name"
     }
 }

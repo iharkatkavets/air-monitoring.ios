@@ -9,17 +9,23 @@ import Combine
 import SwiftUI
 
 @MainActor
-final class MeasurementsScreenViewModel: ObservableObject {
-    @Published var measurements: [Measurement] = []
+@Observable
+final class MeasurementsScreenViewModel {
+    var measurements: [MeasurementData] = []
+    @ObservationIgnored
     private var nextPageCursor: NextPageCursor?
     var canLoadMore: Bool = true
     var isLoading = false
+    @ObservationIgnored
     private var apiClient: APIClient
-    @Published var errorMessage: String? = nil
+    var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
+    @ObservationIgnored
     var loadingTask: Task<Void, Never>?
+    private let sensorID: SensorID
     
-    init() {
+    init(_ sensorID: SensorID) {
+        self.sensorID = sensorID
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
     }
     
@@ -41,7 +47,7 @@ final class MeasurementsScreenViewModel: ObservableObject {
                 try Task.checkCancellation()
                 errorMessage = nil
                 isLoading = true
-                let page = try await apiClient.fetchMeasurementsPage(nextPageCursor)
+                let page = try await apiClient.fetchMeasurementsPage(sensorID, nextPageCursor)
                 try Task.checkCancellation()
                 measurements.append(contentsOf: page.measurements)
                 canLoadMore = page.hasMore

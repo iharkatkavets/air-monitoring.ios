@@ -9,13 +9,12 @@ import SwiftUI
 
 // Reusable custom row
 struct MeasurementRow: View {
-    let item: Measurement
+    let item: MeasurementData
     
     var body: some View {
         HStack(spacing: 12) {
-            // Title + subtitle
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.sensor)
+                Text(item.measurement)
                     .font(.headline)
                 if let parameter = item.parameter, !parameter.isEmpty {
                     Text(parameter)
@@ -56,7 +55,8 @@ struct MeasurementRow: View {
     MeasurementRow(
         item: .init(
             id: 11,
-            sensor: "particle_count",
+            sensorName: "sps30",
+            measurement: "particle_count",
             parameter: "pm4.0",
             value: 28.049,
             unit: "#/cm3",
