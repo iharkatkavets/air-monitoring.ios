@@ -36,26 +36,24 @@ struct AllSensorsListView: View {
                 await viewModel.refresh()
             }
             .padding(.horizontal)
-            .task { await viewModel.viewDidTriggerOnAppear() }
+            .onAppear(perform: viewModel.viewDidTriggerOnAppear)
             .overlay(content: {
                 if viewModel.isLoading {
                     ProgressView()
                 }
             })
             .overlay {
-                if !viewModel.isLoading, let error = viewModel.error {
+                if !viewModel.isLoading, let error = viewModel.errorMessage {
                     ContentUnavailableView(
                         "\(error)",
-                        systemImage: "doc.richtext.fill",
-                        description: Text("Try to search for another title.")
-                    )
+                        systemImage: "icloud.slash.fill",
+                        description: nil)
                 }
                 else if !viewModel.isLoading, viewModel.displaySensors.isEmpty {
                     ContentUnavailableView(
                         "No available sensors",
-                        systemImage: "doc.richtext.fill",
-                        description: Text("Check that server has data")
-                    )
+                        systemImage: "exclamationmark.warninglight.fill",
+                        description: nil)
                 }
             }
         }

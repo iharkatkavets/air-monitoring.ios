@@ -6,18 +6,20 @@
 //
 
 import Foundation
-
+import SwiftUI
 
 struct MeasurementMark: Hashable, Identifiable {
     var id: Self { self }
     let date: Date
     let value: Double
     let param: String
+    let color: Color
 
-    init(date: Date, value: Double, pmValue: String) {
+    init(date: Date, value: Double, parameter: String, color: Color) {
         self.date = date
         self.value = value
-        self.param = pmValue
+        self.param = parameter
+        self.color = color
     }
 }
 

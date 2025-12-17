@@ -12,18 +12,18 @@ import Collections
 
 @MainActor
 final class ChartsScreenViewModel: ObservableObject {
-    var isLoading = false
+    var isLoading = true
     private lazy var apiClient = APIClientImpl(server: AppSettings.serverDomain)
     @Published var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
     let log = Logger()
     @Published var sensorsListPopupIsPresented: Bool = false
-    lazy var sensorsListPopupViewModel =
-    SelectableSensorsListViewModel(onError: { [weak self] in
-        self?.errorMessage = $0.message
-    }, onSelectSensors: { [weak self]  in
-        self?.userDidSelectSensors($0)
-    })
+    lazy var sensorsListPopupViewModel = SelectableSensorsListViewModel(
+        onError: { [weak self] in
+            self?.errorMessage = $0.message
+        }, onSelectSensors: { [weak self]  in
+            self?.userDidSelectSensors($0)
+        })
     @Published var sensors: [(UUID, SensorID, Int, ChartsGroupViewModel)] = []
 
     init() {

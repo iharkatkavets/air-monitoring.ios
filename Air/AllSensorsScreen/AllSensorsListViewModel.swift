@@ -21,18 +21,34 @@ final class AllSensorsListViewModel {
     }
     
     var displaySensors: [DisplaySensor] = []
-    var isLoading: Bool = false
-    var error: String?
+    var isLoading: Bool = true
+    var errorMessage: String?
     
     @ObservationIgnored
     private lazy var apiClient = APIClientImpl(server: AppSettings.serverDomain)
     @ObservationIgnored
     private var availableSensors: [Sensor] = []
+    var obsevationToken: AnyObject?
+    @ObservationIgnored
+    private var domainUpdatedTask: Task<Void, Never>?
 
-    init() { }
+    init() {
+        domainUpdatedTask = Task { [weak self] in
+            let notificationCenter = NotificationCenter.default
+            for await _ in notificationCenter.notifications(named: .domainUpdated, object: nil) {
+                await self?.refresh()
+            }
+        }
+    }
     
-    func viewDidTriggerOnAppear() async {
-        await fetchSensors()
+    deinit {
+        domainUpdatedTask?.cancel()
+    }
+    
+    func viewDidTriggerOnAppear() {
+        Task {
+            await fetchSensors()
+        }
     }
     
     func refresh() async {
@@ -45,6 +61,7 @@ final class AllSensorsListViewModel {
         }
         do {
             isLoading = true
+            errorMessage = nil
             displaySensors.removeAll(keepingCapacity: true)
             availableSensors = try await apiClient.fetchSensors()
             for s in availableSensors {
@@ -60,7 +77,7 @@ final class AllSensorsListViewModel {
         }
         catch {
             if !error.isCancellationError {
-                self.error = error.message
+                self.errorMessage = error.message
             }
         }
     }

@@ -60,8 +60,10 @@ struct MeasurementChart: View {
                 x: .value(viewModel.xAxisTitle, item.date),
                 y: .value(viewModel.yAxisTitle, item.value)
             )
-            .foregroundStyle(by: .value("", item.param))
+            .foregroundStyle(by: .value("Param", item.param))
+            .lineStyle(StrokeStyle(lineWidth: 2.5))
         }
+        .chartForegroundStyleScale(domain: viewModel.colorDomain, range: viewModel.colorRange)
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 1))
         }

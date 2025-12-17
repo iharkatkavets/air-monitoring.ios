@@ -9,14 +9,15 @@ import Combine
 import Foundation
 
 @Observable
+@MainActor
 final class ServerDomainViewModel  {
     var serverDomain: String = AppSettings.serverDomain
     var errorMessage: String?
     var shouldDismiss = false
-    private let onUpdate: ()->Void
+    private let onDomainUpdate: ()->Void
     
-    init(onUpdate: @escaping ()->Void) {
-        self.onUpdate = onUpdate
+    init(onDomainUpdate: @escaping ()->Void) {
+        self.onDomainUpdate = onDomainUpdate
     }
     
     func userDidPressConfirm() {
@@ -34,7 +35,7 @@ final class ServerDomainViewModel  {
                     }
                 }
                 AppSettings.serverDomain = serverDomain
-                onUpdate()
+                onDomainUpdate()
                 shouldDismiss = true
             }
             catch {

@@ -14,11 +14,14 @@ final class SettingsScreenViewModel: ObservableObject {
     @Published var serverDomain = ""
     @Published var maxAge = ""
     @Published var storeInterval = ""
-    private var apiClient: APIClient
+    private lazy var apiClient: APIClient = APIClientImpl(server: AppSettings.serverDomain)
     @Published var errorMessage: String? = nil
+    private lazy var notificationCenter: NotificationCenter = .default
 
     init() {
-        apiClient = APIClientImpl(server: AppSettings.serverDomain)
+    }
+    
+    func viewDidTriggerOnAppear() {
         load()
     }
     
@@ -45,8 +48,9 @@ final class SettingsScreenViewModel: ObservableObject {
     }
     
     func makeServerDomainViewModel() -> ServerDomainViewModel {
-        return ServerDomainViewModel(onUpdate: { [weak self] in
+        return ServerDomainViewModel(onDomainUpdate: { [weak self] in
             self?.load()
+            self?.notificationCenter.post(name: .domainUpdated, object: nil)
         })
     }
     

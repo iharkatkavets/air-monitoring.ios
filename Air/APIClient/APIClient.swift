@@ -45,12 +45,14 @@ protocol APIClient: Sendable {
 final class APIClientImpl: APIClient {
     private let session: URLSession
     let server: ServerDomain
-    
+    let delegateQueue = OperationQueue()
+
     init(server: ServerDomain) {
         self.server = server
         let configuration = URLSessionConfiguration.default
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-        session = URLSession(configuration: configuration)
+        delegateQueue.name = "com.apiclient.network"
+        session = URLSession(configuration: configuration, delegate: nil, delegateQueue: delegateQueue)
     }
     
     private func urlByAppending(_ path: String) -> URL {

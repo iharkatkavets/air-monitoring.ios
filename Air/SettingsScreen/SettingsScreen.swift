@@ -63,6 +63,7 @@ struct SettingsScreen: View {
         }
         .navigationTitle("Settings")
         .toolbarTitleDisplayMode(.inline)
+        .onAppear(perform: viewModel.viewDidTriggerOnAppear)
     }
     
     private var serverDomain: some View {

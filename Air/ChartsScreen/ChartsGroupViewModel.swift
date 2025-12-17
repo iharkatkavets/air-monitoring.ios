@@ -13,7 +13,7 @@ import os.log
 @MainActor
 final class ChartsGroupViewModel: ObservableObject {
     var isLoading = false
-    private var apiClient: APIClient
+    private lazy var apiClient: APIClient = APIClientImpl(server: AppSettings.serverDomain)
     @Published var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
     var loadingTask: Task<Void, Never>?
@@ -22,9 +22,20 @@ final class ChartsGroupViewModel: ObservableObject {
     let sensorID: SensorID
     private let measurements: [Measurement]
     let chartsCount: Int
-
+    private var assignedColors = [String: Color]()
+    let availableColors: [Color] = [
+        Color(hex: "#1F77B4"), // Blue
+        Color(hex: "#FF7F0E"), // Orange
+        Color(hex: "#2CA02C"), // Green
+        Color(hex: "#D62728"), // Red
+        Color(hex: "#9467BD"), // Purple
+        Color(hex: "#17BECF"), // Cyan
+        Color(hex: "#BCBD22"), // Olive
+        Color(hex: "#E377C2"), // Pink
+        Color(hex: "#8C564B"), // Brown
+        Color(hex: "#7F7F7F")  // Gray
+    ]
     init(_ sensorID: SensorID, _ measurements: [Measurement]) {
-        apiClient = APIClientImpl(server: AppSettings.serverDomain)
         self.sensorID = sensorID
         self.measurements = measurements
         self.chartsCount = measurements.count
@@ -35,11 +46,8 @@ final class ChartsGroupViewModel: ObservableObject {
     }
     
     func viewDidTriggerOnAppear() {
-        if loadingTask == nil {
+        if loadingTask == nil || errorMessage != nil {
             fetchMeasurements()
-        }
-        else if apiClient.server != AppSettings.serverDomain {
-            Task { await refresh() }
         }
     }
     
@@ -74,9 +82,11 @@ final class ChartsGroupViewModel: ObservableObject {
             let measurement = v.measurement.lowercased()
             let vm = chartsViewModels[measurement]
             let parameter = v.parameter ?? ""
-            let mark = MeasurementMark(date: v.timestamp, value: v.value, pmValue: parameter)
+            let color = assignedColors[parameter, default: availableColors[assignedColors.count]]
+            assignedColors[parameter] = color
+            let mark = MeasurementMark(date: v.timestamp, value: v.value, parameter: parameter, color: color)
             vm?.yAxisTitle = v.unit
-            vm?.append(mark)
+            vm?.append(mark, color)
         }
     }
     
