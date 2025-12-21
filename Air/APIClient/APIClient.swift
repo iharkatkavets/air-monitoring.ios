@@ -82,7 +82,7 @@ final class APIClientImpl: APIClient {
     }
     
     func fetchSensorStream(_ sensorID: SensorID) async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error> {
-        struct Event: Decodable {
+        nonisolated struct Event: Decodable, Sendable {
             let items: [MeasurementSSE]
         }
         do {
@@ -92,23 +92,34 @@ final class APIClientImpl: APIClient {
             let session = URLSession(configuration: config)
             let url = URL(string: "http://\(server)/api/measurements/\(sensorID)/stream")!
             let request = URLRequest(url: url)
-            let (bytes, _) = try await session.bytes(for: request)
+            let (asyncBytes, _) = try await session.bytes(for: request)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             
-            return AsyncThrowingStream { continuation in
-                Task {
+            let stream = AsyncThrowingStream<[MeasurementSSE], any Error> { continuation in
+                let task = Task.detached {
                     do {
-                        for try await line in bytes.lines where line.hasPrefix("data: "){
+                        for try await line in asyncBytes.lines where line.hasPrefix("data: ") {
+                            try Task.checkCancellation()
                             let jsonStr = line.dropFirst(5)
                             let dataValue = try decoder.decode(Event.self, from: jsonStr.data(using: .utf8)!)
-                            continuation.yield(with: .success(dataValue.items))
+                            continuation.yield(dataValue.items)
                         }
-                    } catch {
+                        continuation.finish()
+                    }
+                    catch _ as CancellationError { }
+                    catch let urlError as URLError where urlError.code == .cancelled { }
+                    catch {
                         continuation.yield(with: .failure(APIClientError.server("Server error. Try again later")))
                     }
                 }
+                continuation.onTermination = { @Sendable termination in
+                    if !task.isCancelled {
+                        task.cancel()
+                    }
+                }
             }
+            return stream
         } catch {
             if error.isNetworkError {
                 throw .network("Network error. Check your internet connection")

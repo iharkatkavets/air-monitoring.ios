@@ -22,6 +22,7 @@ struct ChartsGroupView: View {
         .task {
             viewModel.viewDidTriggerOnAppear()
         }
+        .onDisappear(perform: viewModel.viewDidTriggerOnDisappear)
     }
 }
 

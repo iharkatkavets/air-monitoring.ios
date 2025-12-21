@@ -46,9 +46,13 @@ final class ChartsGroupViewModel: ObservableObject {
     }
     
     func viewDidTriggerOnAppear() {
-        if loadingTask == nil || errorMessage != nil {
+        if loadingTask == nil || errorMessage != nil || loadingTask?.isCancelled == true {
             fetchMeasurements()
         }
+    }
+    
+    func viewDidTriggerOnDisappear() {
+        loadingTask?.cancel()
     }
     
     func fetchMeasurements() {
@@ -61,7 +65,6 @@ final class ChartsGroupViewModel: ObservableObject {
                 defer {
                     isLoading = false
                 }
-                try Task.checkCancellation()
                 errorMessage = nil
                 isLoading = true
                 for try await measurements in try await apiClient.fetchSensorStream(sensorID) {
