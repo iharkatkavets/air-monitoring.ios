@@ -12,20 +12,21 @@ struct SensorRow: View {
     let measurements: [String]
     
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.sensorName)
-                    .font(.headline)
-                Text(item.sensorID)
-                    .font(.subheadline.monospaced())
-                    .foregroundStyle(.secondary)
-            }
+        VStack(alignment: .leading, spacing: 4) {
+            Text(item.sensorName)
+                .font(.headline)
             
-            Spacer()
-            
-            Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
-                .font(.caption)
+            Text(item.sensorID)
+                .font(.subheadline.monospaced())
                 .foregroundStyle(.secondary)
+            
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Spacer()
+                Text("last seen:")
+                Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 }

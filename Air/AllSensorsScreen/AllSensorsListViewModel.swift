@@ -63,6 +63,7 @@ final class AllSensorsListViewModel {
             isLoading = true
             errorMessage = nil
             displaySensors.removeAll(keepingCapacity: true)
+            apiClient = APIClientImpl(server: AppSettings.serverDomain)
             availableSensors = try await apiClient.fetchSensors()
             for s in availableSensors {
                 displaySensors.append(
@@ -81,6 +82,4 @@ final class AllSensorsListViewModel {
             }
         }
     }
-    
 }
-

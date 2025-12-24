@@ -25,7 +25,8 @@ struct MeasurementChart: View {
             Spacer()
             chartTitle
             Spacer()
-            infoButton
+            Color.clear.frame(width: 16, height: 16)
+//            infoButton
         }
     }
     

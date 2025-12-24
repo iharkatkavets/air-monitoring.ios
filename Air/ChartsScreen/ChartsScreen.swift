@@ -18,7 +18,7 @@ struct ChartsScreen: View {
 
     var body: some View {
         List(viewModel.sensors, id: \.0) { t in
-            Section(t.1) {
+            Section {
                 ChartsGroupView(
                     spacing: 32,
                     height: listHeight/2,
@@ -27,11 +27,15 @@ struct ChartsScreen: View {
                 .padding(.top, 16)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
+            } header: {
+               Text(t.1)
+                    .foregroundStyle(.white)
             }
         }
         .scrollIndicators(.hidden)
-        .listSectionSpacing(0)
+        .listSectionSpacing(32)
         .edgesIgnoringSafeArea(.horizontal)
+        .listStyle(.plain)
         .background(
             GeometryReader { geo in
                 Color.clear
@@ -40,7 +44,6 @@ struct ChartsScreen: View {
                     }
             }
         )
-        .listStyle(.plain)
         .onAppear { viewModel.viewDidTriggerOnAppear() }
         .navigationTitle("Live Charts")
         .toolbarTitleDisplayMode(.inline)
@@ -63,17 +66,8 @@ struct ChartsScreen: View {
             Button("OK", role: .close) {
                 viewModel.errorMessage = nil
             }
-            Button("Retry", role: .confirm) {
-//                viewModel.fetchMeasurements()
-            }
         }, message: {
             Text(viewModel.errorMessage ?? "")
-        })
-        .sheet(isPresented: $isNumberConentrationInfoPresented, content: {
-            infoView("number-concentration-info.md")
-        })
-        .sheet(isPresented: $isMassConcentrationInfoPresented, content: {
-            infoView("mass-concentration-info.md")
         })
     }
     

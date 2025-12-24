@@ -13,7 +13,6 @@ import Collections
 @MainActor
 final class ChartsScreenViewModel: ObservableObject {
     var isLoading = true
-    private lazy var apiClient = APIClientImpl(server: AppSettings.serverDomain)
     @Published var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
     let log = Logger()
@@ -43,12 +42,10 @@ final class ChartsScreenViewModel: ObservableObject {
     
     func refresh() async {
         errorMessage = nil
-        apiClient = APIClientImpl(server: AppSettings.serverDomain)
     }
     
     func userDidPressTryAgain() {
         errorMessage = nil
-        apiClient = APIClientImpl(server: AppSettings.serverDomain)
     }
     
     func userDidPressAddSensor() {

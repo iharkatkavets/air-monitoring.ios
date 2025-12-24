@@ -22,22 +22,16 @@ struct SelectableSensorRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         } label: {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.sensorName)
-                        .font(.headline)
-                    Text(item.sensorId)
-                        .font(.subheadline.monospaced())
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
-                    .font(.caption)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.sensorName)
+                    .font(.headline)
+                Text(item.sensorId)
+                    .font(.subheadline.monospaced())
                     .foregroundStyle(.secondary)
+                Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
             }
-            .padding(12)
         }
     }
 }
