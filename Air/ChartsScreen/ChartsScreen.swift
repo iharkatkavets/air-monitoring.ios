@@ -10,7 +10,7 @@ import MarkdownUI
 import Collections
 
 struct ChartsScreen: View {
-    @ObservedObject var viewModel: ChartsScreenViewModel
+    @State var viewModel: ChartsScreenViewModel
     @State var isNumberConentrationInfoPresented = false
     @State var isMassConcentrationInfoPresented = false
     @State var toobarButtonRect: CGRect = .zero

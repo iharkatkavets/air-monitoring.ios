@@ -10,13 +10,17 @@ import Charts
 
 struct MeasurementChart: View {
     var viewModel: MeasurementChartViewModel
-//    @Binding var showInfo: Bool
     
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             chartHeader
             chart
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(uiColor: .secondarySystemBackground))
+        )
     }
     
     var chartHeader: some View {
@@ -26,7 +30,6 @@ struct MeasurementChart: View {
             chartTitle
             Spacer()
             Color.clear.frame(width: 16, height: 16)
-//            infoButton
         }
     }
     
@@ -40,19 +43,6 @@ struct MeasurementChart: View {
         Text(viewModel.chartTitle)
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.primary.opacity(0.8))
-    }
-    
-    var infoButton: some View {
-        Button {
-//            showInfo = true
-        } label: {
-            Image(systemName: "info.circle")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary.opacity(0.8))
-                .symbolRenderingMode(.hierarchical)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
     
     var chart: some View {

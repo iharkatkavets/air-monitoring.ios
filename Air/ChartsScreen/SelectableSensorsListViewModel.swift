@@ -16,6 +16,7 @@ final class SelectableSensorsListViewModel: ObservableObject {
         let sensorName: SensorName
         let lastSeenTime: Date
         let measurements: [[String]] // [[measurement_id, measurement]]
+        let isOnline: Bool
     }
     
     private var availableSensors = [Sensor]()
@@ -40,6 +41,7 @@ final class SelectableSensorsListViewModel: ObservableObject {
             displaySensors.removeAll(keepingCapacity: true)
             selectedSensors.removeAll()
             availableSensors = try await apiClient.fetchSensors()
+            let now = Date.now
             for s in availableSensors {
                 displaySensors.append(
                     DisplaySensor(
@@ -47,7 +49,8 @@ final class SelectableSensorsListViewModel: ObservableObject {
                         sensorName: s.sensorName,
                         lastSeenTime: s.lastSeenTime,
                         measurements: s.measurements
-                            .map( { [ s.sensorId + "." + $0, $0 ] } )
+                            .map( { [ s.sensorId + "." + $0, $0 ] }),
+                        isOnline: now.timeIntervalSince(s.lastSeenTime).isLess(than: AppSettings.storeInterval)
                     )
                 )
             }

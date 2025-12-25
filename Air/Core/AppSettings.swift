@@ -20,10 +20,10 @@ enum AppSettings {
     static var serverDomain: ServerDomain = ""
     
     @UserDefaultsValue(ServerSettingKey.maxAge)
-    static var maxAge: DurationSeconds = 60*60*24*7
+    static var maxAge: DurationSeconds = -1
     
     @UserDefaultsValue(ServerSettingKey.storeInterval)
-    static var storeInterval: DurationSeconds = 60
+    static var storeInterval: DurationSeconds = -1
     
     @UserDefaultsValue("sensors")
     static var sensors: [SensorConfig] = []

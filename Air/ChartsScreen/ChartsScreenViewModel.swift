@@ -11,19 +11,21 @@ import os.log
 import Collections
 
 @MainActor
-final class ChartsScreenViewModel: ObservableObject {
+@Observable
+final class ChartsScreenViewModel {
     var isLoading = true
-    @Published var errorMessage: String? = nil
+    var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
     let log = Logger()
-    @Published var sensorsListPopupIsPresented: Bool = false
+    var sensorsListPopupIsPresented: Bool = false
+    @ObservationIgnored
     lazy var sensorsListPopupViewModel = SelectableSensorsListViewModel(
         onError: { [weak self] in
             self?.errorMessage = $0.message
         }, onSelectSensors: { [weak self]  in
             self?.userDidSelectSensors($0)
         })
-    @Published var sensors: [(UUID, SensorID, Int, ChartsGroupViewModel)] = []
+    var sensors: [(UUID, SensorID, Int, ChartsGroupViewModel)] = []
 
     init() {
     }

@@ -11,7 +11,7 @@ typealias DurationString = String // "1s or 2m or 3h or 4d"
 
 struct DurationParser {
     static func parse(_ string: DurationString) -> DurationSeconds? {
-        let pattern = #"(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?"#
+        let pattern = #"^(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$"#
         guard let match = try? NSRegularExpression(pattern: pattern)
             .firstMatch(in: string, range: NSRange(string.startIndex..., in: string)) else {
             return nil
@@ -32,6 +32,9 @@ struct DurationParser {
     }
     
     static func parse(_ seconds: DurationSeconds) -> DurationString {
+        guard seconds >= 0 else {
+            return ""
+        }
         let seconds = Int(seconds)
         let d = seconds/86400
         let h = (seconds%86400)/3600

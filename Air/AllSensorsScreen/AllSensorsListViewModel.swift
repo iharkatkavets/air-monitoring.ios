@@ -18,6 +18,7 @@ final class AllSensorsListViewModel {
         let sensorName: SensorName
         let lastSeenTime: Date
         let measurements: [Measurement]
+        let isOnline: Bool
     }
     
     var displaySensors: [DisplaySensor] = []
@@ -65,13 +66,15 @@ final class AllSensorsListViewModel {
             displaySensors.removeAll(keepingCapacity: true)
             apiClient = APIClientImpl(server: AppSettings.serverDomain)
             availableSensors = try await apiClient.fetchSensors()
+            let now = Date.now
             for s in availableSensors {
                 displaySensors.append(
                     DisplaySensor(
                         sensorID: s.sensorId,
                         sensorName: s.sensorName,
                         lastSeenTime: s.lastSeenTime,
-                        measurements: s.measurements
+                        measurements: s.measurements,
+                        isOnline:  now.timeIntervalSince(s.lastSeenTime).isLess(than: AppSettings.storeInterval)
                     )
                 )
             }

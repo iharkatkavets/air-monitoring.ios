@@ -10,16 +10,21 @@ import Combine
 
 
 @MainActor
-final class SettingsScreenViewModel: ObservableObject {
-    @Published var serverDomain = ""
-    @Published var maxAge = ""
-    @Published var storeInterval = ""
+@Observable
+final class SettingsScreenViewModel {
+    var serverDomain = ""
+    var maxAge = ""
+    var storeInterval = ""
+    @ObservationIgnored
     private lazy var apiClient: APIClient = APIClientImpl(server: AppSettings.serverDomain)
-    @Published var errorMessage: String? = nil
+    var errorMessage: String? = nil
+    @ObservationIgnored
     private lazy var notificationCenter: NotificationCenter = .default
+    var serverDomainValid: Bool { !serverDomain.isEmpty }
+    var maxAgeValid: Bool { !maxAge.isEmpty }
+    var storeIntervalValid: Bool { !storeInterval.isEmpty }
 
-    init() {
-    }
+    init() { }
     
     func viewDidTriggerOnAppear() {
         load()

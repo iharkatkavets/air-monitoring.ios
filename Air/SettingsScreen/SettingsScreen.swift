@@ -30,7 +30,7 @@ struct SettingsScreen: View {
         }
     }
     
-    @ObservedObject var viewModel: SettingsScreenViewModel
+    var viewModel: SettingsScreenViewModel
     @State private var activeSheet: ActiveSheet?
 
     var body: some View {
@@ -73,7 +73,7 @@ struct SettingsScreen: View {
                 Spacer()
                 Text("\(viewModel.serverDomain)")
             }
-            .foregroundStyle(viewModel.serverDomain.isEmpty ? .red : .primary)
+            .foregroundStyle(viewModel.serverDomainValid ? Color.primary : Color.red)
         }
     }
     
@@ -87,6 +87,7 @@ struct SettingsScreen: View {
                 Text("\(viewModel.maxAge)")
             }
         }
+        .foregroundStyle(viewModel.maxAgeValid ? Color.primary : Color.red)
     }
     
     private var storeInterval: some View {
@@ -99,6 +100,7 @@ struct SettingsScreen: View {
                 Text("\(viewModel.storeInterval)")
             }
         }
+        .foregroundStyle(viewModel.storeIntervalValid ? Color.primary : Color.red)
     }
 }
 

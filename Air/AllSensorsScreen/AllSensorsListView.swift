@@ -35,7 +35,6 @@ struct AllSensorsListView: View {
             .refreshable {
                 await viewModel.refresh()
             }
-            .padding(.horizontal)
             .onAppear(perform: viewModel.viewDidTriggerOnAppear)
             .overlay(content: {
                 if viewModel.isLoading {

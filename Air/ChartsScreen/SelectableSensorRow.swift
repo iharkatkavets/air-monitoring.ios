@@ -28,11 +28,21 @@ struct SelectableSensorRow: View {
                 Text(item.sensorId)
                     .font(.subheadline.monospaced())
                     .foregroundStyle(.secondary)
-                Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
+                HStack(spacing: 12) {
+                    Spacer()
+                    Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                    availabilityDot
+                }
             }
         }
+    }
+    
+    private var availabilityDot: some View {
+        Circle()
+            .fill(item.isOnline ? .green : .red)
+            .frame(width: 12, height: 12)
     }
 }
     
@@ -48,7 +58,8 @@ struct SelectableSensorRow: View {
                     ["sps30.pizero.mass_concentration", "mass_concentration"],
                     ["sps30.pizero.mass_concentration", "number_concentration"],
                     ["sps30.pizero.mass_concentration", "typical_particle_size"]
-                ]
+                ],
+                isOnline: true
             ), measurements: [
                 ["sps30.pizero.mass_concentration", "mass_concentration"],
                 ["sps30.pizero.mass_concentration", "number_concentration"],

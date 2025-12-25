@@ -11,9 +11,8 @@ struct SelectableSensorsListView: View {
     @ObservedObject var viewModel: SelectableSensorsListViewModel
     
     var body: some View {
-        NavigationView {
-            List(viewModel.displaySensors,
-                 selection: $viewModel.selectedSensors) { sensor in
+        NavigationStack {
+            List(viewModel.displaySensors, selection: $viewModel.selectedSensors) { sensor in
                 SelectableSensorRow(item: sensor, measurements: sensor.measurements)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 8)
@@ -21,23 +20,23 @@ struct SelectableSensorsListView: View {
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
             }
-                 .listStyle(.plain)
-                 .overlay(content: {
-                     if viewModel.isLoading {
-                         ProgressView()
-                     }
-                 })
-                 .navigationTitle("Available")
-                 .toolbarTitleDisplayMode(.inline)
-                 .toolbar(content: {
-                     ToolbarItem {
-                         Button(role: .confirm, action: viewModel.userDidPressDone)
-                             .disabled(viewModel.selectedSensors.isEmpty)
-                     }
-                 })
-                 .padding(.horizontal)
-                 .task { await viewModel.viewDidTriggerOnAppear() }
-                 .environment(\.editMode, .constant(.active))
+            .listStyle(.plain)
+            .overlay(content: {
+                if viewModel.isLoading {
+                    ProgressView()
+                }
+            })
+            .navigationTitle("Available")
+            .toolbarTitleDisplayMode(.inline)
+            .toolbar(content: {
+                ToolbarItem {
+                    Button(role: .confirm, action: viewModel.userDidPressDone)
+                        .disabled(viewModel.selectedSensors.isEmpty)
+                }
+            })
+            .padding(.horizontal)
+            .task { await viewModel.viewDidTriggerOnAppear() }
+            .environment(\.editMode, .constant(.active))
         }
     }
 }
