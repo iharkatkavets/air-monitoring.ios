@@ -16,9 +16,10 @@ struct ChartsGroupView: View {
         VStack(spacing: spacing) {
             ForEach(viewModel.chartsViewModels.keys.sorted(), id: \.self) {
                 MeasurementChart(viewModel: viewModel.chartsViewModels[$0]!)
-                    .frame(height: height)
+                    .frame(height: (height-CGFloat(viewModel.chartsCount-1)*spacing)/CGFloat(viewModel.chartsCount))
             }
         }
+        .frame(height: height)
         .task {
             viewModel.viewDidTriggerOnAppear()
         }

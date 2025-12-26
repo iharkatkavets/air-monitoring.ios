@@ -13,6 +13,12 @@ import Collections
 @MainActor
 @Observable
 final class ChartsScreenViewModel {
+    struct Section: Identifiable {
+        let id: UUID
+        let sensorID: SensorID
+        let chartsCount: Int
+        let viewModel: ChartsGroupViewModel
+    }
     var isLoading = true
     var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
@@ -25,19 +31,18 @@ final class ChartsScreenViewModel {
         }, onSelectSensors: { [weak self]  in
             self?.userDidSelectSensors($0)
         })
-    var sensors: [(UUID, SensorID, Int, ChartsGroupViewModel)] = []
+    var sections = [Section]()
 
-    init() {
-    }
+    init() { }
     
     func viewDidTriggerOnAppear() {
-        guard sensors.isEmpty else {
+        guard sections.isEmpty else {
             return
         }
         
         for config in AppSettings.sensors {
-            sensors.append(
-                (UUID(), config.id, config.measurements.count, ChartsGroupViewModel(config.id, config.measurements))
+            sections.append(
+                Section(id: UUID(), sensorID: config.id, chartsCount: config.measurements.count, viewModel: ChartsGroupViewModel(config.id, config.measurements))
             )
         }
     }
@@ -57,7 +62,7 @@ final class ChartsScreenViewModel {
     private func userDidSelectSensors(_ list: [(SensorID, SensorName, [Measurement])]) {
         sensorsListPopupIsPresented = false
         for (id, _, measurements) in list {
-            sensors.append((UUID(), id, measurements.count, ChartsGroupViewModel(id, measurements)))
+            sections.append(Section(id: UUID(), sensorID:id, chartsCount: measurements.count, viewModel: ChartsGroupViewModel(id, measurements)))
         }
         
         Task {

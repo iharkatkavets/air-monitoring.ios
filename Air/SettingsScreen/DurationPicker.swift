@@ -7,6 +7,27 @@
 
 import SwiftUI
 
+extension DurationSeconds {
+    func secondsFor(minutes: Int) -> DurationSeconds {
+        return Double(minutes)*60
+    }
+    
+    func secondsFor(hours: Int) -> DurationSeconds {
+        return Double(hours)*60*60
+    }
+    
+    func secondsFor(days: Int) -> DurationSeconds {
+        return Double(days)*24*60*60
+    }
+    
+    func minutesFor(seconds: Int) -> DurationSeconds {
+        return Double(seconds) / 60
+    }
+    
+    func days(value: Int) -> DurationSeconds     {
+        return Double(value)*24*60*60
+    }
+}
 
 struct DurationPicker: View {
     struct Configuration {

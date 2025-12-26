@@ -8,15 +8,23 @@
 import SwiftUI
 
 struct SettingsScreen: View {
-    enum ActiveSheet: Int, Identifiable {
-        var id: Int { rawValue }
-        case maxAge
-        case storeInterval
+    enum ActiveSheet: Identifiable {
+        case maxAge(DurationSeconds)
+        case storeInterval(DurationSeconds)
         
         var title: String {
             switch self {
             case .maxAge: return "Max Age"
             case .storeInterval: return "Store Interval"
+            }
+        }
+        
+        var id: Int {
+            switch self {
+            case .maxAge:
+                return 0
+            case .storeInterval:
+                return 1
             }
         }
         
@@ -26,6 +34,15 @@ struct SettingsScreen: View {
                 return DurationPicker.Configuration(numbers: 1...60, units: ["d"])
             case .storeInterval:
                 return DurationPicker.Configuration(numbers: 1...60, units: ["s","m"])
+            }
+        }
+        
+        var defaultValue: DurationSeconds {
+            switch self {
+            case .maxAge(let defaultValue):
+                return defaultValue
+            case .storeInterval(let defaultValue):
+                return defaultValue
             }
         }
     }
@@ -47,6 +64,7 @@ struct SettingsScreen: View {
             DurationSelectionView(
                 title: sheet.title,
                 configuration: sheet.configuration,
+                selectedDuration: sheet.defaultValue,
                 cancelAction: { activeSheet = nil },
                 applyAction: { value in
                     switch sheet {
@@ -82,7 +100,7 @@ struct SettingsScreen: View {
             Text("Max Age Duration: ")
             Spacer()
             Button(action: {
-                activeSheet = .maxAge
+                activeSheet = .maxAge(viewModel.maxAgeSeconds)
             }) {
                 Text("\(viewModel.maxAge)")
             }
@@ -95,7 +113,7 @@ struct SettingsScreen: View {
             Text("Store Interval: ")
             Spacer()
             Button(action: {
-                activeSheet = .storeInterval
+                activeSheet = .storeInterval(viewModel.storeIntervalSeconds)
             }) {
                 Text("\(viewModel.storeInterval)")
             }

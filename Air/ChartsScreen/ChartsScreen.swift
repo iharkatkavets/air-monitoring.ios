@@ -15,25 +15,50 @@ struct ChartsScreen: View {
     @State var isMassConcentrationInfoPresented = false
     @State var toobarButtonRect: CGRect = .zero
     @State private var listHeight: CGFloat = 0
+    var isAlertPresented: Binding<Bool> {
+        Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )
+    }
 
     var body: some View {
-        List(viewModel.sensors, id: \.0) { t in
+        list()
+        .onAppear { viewModel.viewDidTriggerOnAppear() }
+        .navigationTitle("Live Charts")
+        .toolbarTitleDisplayMode(.inline)
+        .toolbar {
+            toolBarPlusButton
+        }
+        .alert(
+            "Data Retreiving Error",
+            isPresented: isAlertPresented,
+            actions: {
+                Button("OK", role: .close) {
+                    viewModel.errorMessage = nil
+                }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
+    }
+    
+    private func list() -> some View {
+        List(viewModel.sections) { s in
             Section {
                 ChartsGroupView(
-                    spacing: 32,
-                    height: listHeight/2,
-                    viewModel: t.3)
-                .frame(height: CGFloat(t.2)*listHeight/2)
-                .padding(.top, 16)
+                    spacing: 16,
+                    height: heightForGroupOfCharts(s.chartsCount),
+                    viewModel: s.viewModel)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             } header: {
-               Text(t.1)
+               Text(s.sensorID)
                     .foregroundStyle(.white)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 32, bottom: -16, trailing: 32))
             }
         }
+        .listSectionSpacing(16)
         .scrollIndicators(.hidden)
-        .listSectionSpacing(32)
         .edgesIgnoringSafeArea(.horizontal)
         .listStyle(.plain)
         .background(
@@ -44,46 +69,24 @@ struct ChartsScreen: View {
                     }
             }
         )
-        .onAppear { viewModel.viewDidTriggerOnAppear() }
-        .navigationTitle("Live Charts")
-        .toolbarTitleDisplayMode(.inline)
-        .toolbar(content: {
-            ToolbarItem {
-                Button(action: viewModel.userDidPressAddSensor) {
-                    Image(systemName: "plus")
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: $viewModel.sensorsListPopupIsPresented, attachmentAnchor: .point(.top), arrowEdge: .top) {
-                    SelectableSensorsListView(viewModel: viewModel.sensorsListPopupViewModel)
-                        .presentationCompactAdaptation(.popover)
-                        .frame(width: 300, height: 400)
-                }
-            }
-        })
-        .alert("Data Retreiving Error",
-               isPresented: .constant(viewModel.errorMessage != nil),
-               actions: {
-            Button("OK", role: .close) {
-                viewModel.errorMessage = nil
-            }
-        }, message: {
-            Text(viewModel.errorMessage ?? "")
-        })
     }
     
-    
-    private func infoView(_ fileName: String) -> some View {
-        ScrollView {
-            Markdown(MarkdownContent(try! String(contentsOfFile: Bundle.main.path(forResource: fileName, ofType: nil)!, encoding: .utf8)))
-                .padding()
+    private var toolBarPlusButton: some ToolbarContent {
+        ToolbarItem {
+            Button(action: viewModel.userDidPressAddSensor) {
+                Image(systemName: "plus")
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: $viewModel.sensorsListPopupIsPresented, attachmentAnchor: .point(.top), arrowEdge: .top) {
+                SelectableSensorsListView(viewModel: viewModel.sensorsListPopupViewModel)
+                    .presentationCompactAdaptation(.popover)
+                    .frame(width: 300, height: 400)
+            }
         }
     }
     
-    private func heightForGroupOfCharts(_ count: Int) -> (CGFloat, Axis) -> CGFloat {
-        let count = CGFloat(count)
-        return { length, axis in
-            count * (length-32) * 0.5
-        }
+    private func heightForGroupOfCharts(_ count: Int) -> CGFloat {
+        return CGFloat(count)*listHeight/2
     }
     
     @ViewBuilder

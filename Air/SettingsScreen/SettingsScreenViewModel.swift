@@ -23,6 +23,8 @@ final class SettingsScreenViewModel {
     var serverDomainValid: Bool { !serverDomain.isEmpty }
     var maxAgeValid: Bool { !maxAge.isEmpty }
     var storeIntervalValid: Bool { !storeInterval.isEmpty }
+    var maxAgeSeconds = AppSettings.maxAge
+    var storeIntervalSeconds = AppSettings.storeInterval
 
     init() { }
     
