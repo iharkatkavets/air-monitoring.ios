@@ -7,13 +7,23 @@
 
 import Foundation
 
-extension Error {
+nonisolated extension Error {
     var isNetworkError: Bool {
         let error = self as NSError
         return error.domain == NSURLErrorDomain
     }
     
+    var isTimeoutError: Bool {
+        let nsError = self as NSError
+        return nsError.domain == NSURLErrorDomain
+        && nsError.code == NSURLErrorTimedOut
+    }
+    
     var isCancellationError: Bool {
-        return (self as NSError).code == NSURLErrorCancelled
+        return self is CancellationError || (self as NSError).code == NSURLErrorCancelled
+    }
+    
+    var nsErrorCode: Int {
+        return (self as NSError).code
     }
 }

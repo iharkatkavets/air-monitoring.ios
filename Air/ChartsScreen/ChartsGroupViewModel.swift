@@ -14,7 +14,6 @@ import os.log
 final class ChartsGroupViewModel: ObservableObject {
     var isLoading = false
     private lazy var apiClient: APIClient = APIClientImpl(server: AppSettings.serverDomain)
-    @Published var errorMessage: String? = nil
     var loadMoreButtonTitle: String = "Load more"
     var loadingTask: Task<Void, Never>?
     let log = Logger()
@@ -35,18 +34,24 @@ final class ChartsGroupViewModel: ObservableObject {
         Color(hex: "#8C564B"), // Brown
         Color(hex: "#7F7F7F")  // Gray
     ]
+    private var isFetchErrorOccured = true
+    
     init(_ sensorID: SensorID, _ measurements: [Measurement]) {
         self.sensorID = sensorID
         self.measurements = measurements
         self.chartsCount = measurements.count
         
         measurements.forEach {
-            chartsViewModels[$0] = MeasurementChartViewModel(chartTitle: $0)
+            chartsViewModels[$0] = MeasurementChartViewModel(
+                chartTitle: $0,
+                onRetryAction: { [weak self] in
+                    self?.userDidPressTryAgain()
+                })
         }
     }
     
     func viewDidTriggerOnAppear() {
-        if loadingTask == nil || errorMessage != nil || loadingTask?.isCancelled == true {
+        if loadingTask == nil || isFetchErrorOccured || loadingTask?.isCancelled == true {
             fetchMeasurements()
         }
     }
@@ -58,23 +63,20 @@ final class ChartsGroupViewModel: ObservableObject {
     func fetchMeasurements() {
         loadingTask?.cancel()
         loadingTask = Task { [unowned self] in
+            defer {
+                setIsLoading(false)
+            }
             do {
-                guard !isLoading else {
-                    return
-                }
-                defer {
-                    isLoading = false
-                }
-                errorMessage = nil
-                isLoading = true
-                for try await measurements in try await apiClient.fetchSensorStream(sensorID) {
+                setIsLoading(true)
+                setError(nil)
+                for try await measurements in try await apiClient.fetchSensorStream(sensorID, 10) {
                     try Task.checkCancellation()
                     appendValues(measurements)
                 }
             }
             catch {
                 if !error.isCancellationError {
-                    errorMessage = (error as? APIClientError)?.message
+                    setError((error as? APIClientError)?.message)
                 }
             }
         }
@@ -93,19 +95,32 @@ final class ChartsGroupViewModel: ObservableObject {
         }
     }
     
+    private func setError(_ message: String?) {
+        isFetchErrorOccured = message != nil
+        for (_, vm) in chartsViewModels {
+            vm.setError(message)
+        }
+    }
+    
+    private func setIsLoading(_ value: Bool) {
+        isLoading = value
+        for (_, vm) in chartsViewModels {
+            vm.setIsLoading(value)
+        }
+    }
+    
     func refresh() async {
-        errorMessage = nil
+        isFetchErrorOccured = false
         loadingTask?.cancel()
         await loadingTask?.value
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
         for (_, vm) in chartsViewModels {
-            vm.values.removeAll()
+            vm.removeAll()
         }
         fetchMeasurements()
     }
     
-    func userDidPressTryAgain() {
-        errorMessage = nil
+    private func userDidPressTryAgain() {
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
         fetchMeasurements()
     }

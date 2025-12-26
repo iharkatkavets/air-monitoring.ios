@@ -20,13 +20,15 @@ fileprivate struct SettingsResponse: Decodable {
     let settings: [Item]
 }
 
+typealias ClientErrorCode = Int
+
 enum APIClientError: Swift.Error {
-    case network(String)
+    case network(ClientErrorCode, String)
     case server(String)
     
     var message: String {
         switch self {
-        case .network(let string):
+        case .network(_, let string):
             return string
         case .server(let string):
             return string
@@ -37,7 +39,7 @@ enum APIClientError: Swift.Error {
 protocol APIClient: Sendable {
     var server: ServerDomain { get }
     func fetchMeasurementsPage(_ sensorID: SensorID, _ cursor: NextPageCursor?) async throws(APIClientError) -> MeasurementsPage
-    func fetchSensorStream(_ sensorID: SensorID) async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error>
+    func fetchSensorStream(_ sensorID: SensorID, _ timeout: TimeInterval) async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error>
     func updateSetting(_ value: CustomStringConvertible, for key: ServerSettingKey) async throws(APIClientError)
     func fetchSensors() async throws(APIClientError) -> [Sensor]
 }
@@ -74,20 +76,21 @@ final class APIClientImpl: APIClient {
             return page
         } catch {
             if error.isNetworkError {
-                throw .network("Network error. Check your internet connection")
+                throw .network(error.nsErrorCode, "Network error. Check your internet connection")
             } else {
                 throw .server("Server error. Try again later")
             }
         }
     }
     
-    func fetchSensorStream(_ sensorID: SensorID) async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error> {
+    func fetchSensorStream(_ sensorID: SensorID, _ timeout: TimeInterval) async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error> {
         nonisolated struct Event: Decodable, Sendable {
             let items: [MeasurementSSE]
         }
+        
         do {
             let config = URLSessionConfiguration.default
-            config.timeoutIntervalForRequest = .infinity
+            config.timeoutIntervalForRequest = timeout
             config.timeoutIntervalForResource = .infinity
             let session = URLSession(configuration: config)
             let url = URL(string: "http://\(server)/api/measurements/\(sensorID)/stream")!
@@ -97,7 +100,7 @@ final class APIClientImpl: APIClient {
             decoder.dateDecodingStrategy = .iso8601
             
             let stream = AsyncThrowingStream<[MeasurementSSE], any Error> { continuation in
-                let task = Task.detached {
+                let streamTask = Task.detached {
                     do {
                         for try await line in asyncBytes.lines where line.hasPrefix("data: ") {
                             try Task.checkCancellation()
@@ -105,24 +108,27 @@ final class APIClientImpl: APIClient {
                             let dataValue = try decoder.decode(Event.self, from: jsonStr.data(using: .utf8)!)
                             continuation.yield(dataValue.items)
                         }
+                        print("async bytes done")
                         continuation.finish()
                     }
-                    catch _ as CancellationError { }
-                    catch let urlError as URLError where urlError.code == .cancelled { }
                     catch {
-                        continuation.yield(with: .failure(APIClientError.server("Server error. Try again later")))
+                        if !error.isCancellationError {
+                            print("stream triggered error")
+                            continuation.finish(throwing: APIClientError.server("Server error. Try again later"))
+                        }
                     }
                 }
                 continuation.onTermination = { @Sendable termination in
-                    if !task.isCancelled {
-                        task.cancel()
+                    print("on Termination")
+                    if !streamTask.isCancelled {
+                        streamTask.cancel()
                     }
                 }
             }
             return stream
         } catch {
             if error.isNetworkError {
-                throw .network("Network error. Check your internet connection")
+                throw .network(error.nsErrorCode, "Network error. Check your internet connection")
             } else {
                 throw .server("Server error. Try again later")
             }
@@ -138,7 +144,7 @@ final class APIClientImpl: APIClient {
             _ = try JSONDecoder().decode(SettingsResponse.Item.self, from: data)
         } catch {
             if error.isNetworkError {
-                throw .network("Network error. Check your internet connection")
+                throw .network(error.nsErrorCode, "Network error. Check your internet connection")
             } else {
                 throw .server("Server error. Try again later")
             }
@@ -153,7 +159,7 @@ final class APIClientImpl: APIClient {
             return response.settings.map { .init(key: $0.key, value: $0.value) }
         } catch {
             if error.isNetworkError {
-                throw .network("Network error. Check your internet connection")
+                throw .network(error.nsErrorCode, "Network error. Check your internet connection")
             } else {
                 throw .server("Server error. Try again later")
             }
@@ -184,7 +190,7 @@ final class APIClientImpl: APIClient {
             return response.map { .init(sensorId: $0.sensorId, sensorName: $0.sensorName, lastSeenTime: $0.lastSeen, measurements: $0.measurements) }
         } catch {
             if error.isNetworkError {
-                throw .network("Network error. Check your internet connection")
+                throw .network(error.nsErrorCode, "Network error. Check your internet connection")
             } else {
                 throw .server("Server error. Try again later")
             }

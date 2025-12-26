@@ -17,7 +17,7 @@ final class MeasurementChartViewModel {
     var values: [MeasurementMark] = []
     var startDate: Date = Date().addingTimeInterval(TimeInterval(-60))
     var endDate: Date = .now
-    var isLoading = false
+    var isLoading = true
     @ObservationIgnored
     private var colorsByParam: [String: Color] = [:]
     var colorDomain: [String] {
@@ -26,15 +26,19 @@ final class MeasurementChartViewModel {
     var colorRange: [Color] {
         colorDomain.map { colorsByParam[$0]! }
     }
+    var errorMessage: String? = nil
+    private let onRetryAction: ()->Void
 
-    init(chartTitle: String) {
+    init(chartTitle: String, onRetryAction: @escaping ()->Void) {
         self.chartTitle = chartTitle
+        self.onRetryAction = onRetryAction
     }
     
     func append(_ value: MeasurementMark, _ color: Color) {
         if value.date < endDate {
             return
         }
+        isLoading = false
         values.append(value)
         endDate = max(endDate, value.date)
         startDate = endDate.addingTimeInterval(TimeInterval(-60))
@@ -42,5 +46,21 @@ final class MeasurementChartViewModel {
         if colorsByParam[value.param] == nil {
             colorsByParam[value.param] = color
         }
+    }
+    
+    func setError(_ message: String?) {
+        errorMessage = message
+    }
+    
+    func setIsLoading(_ value: Bool) {
+        isLoading = value
+    }
+    
+    func removeAll() {
+        values.removeAll()
+    }
+    
+    func userDidPressRetryAfterError() {
+        onRetryAction()
     }
 }

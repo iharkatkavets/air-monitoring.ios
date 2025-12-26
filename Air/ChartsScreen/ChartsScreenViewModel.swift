@@ -42,7 +42,12 @@ final class ChartsScreenViewModel {
         
         for config in AppSettings.sensors {
             sections.append(
-                Section(id: UUID(), sensorID: config.id, chartsCount: config.measurements.count, viewModel: ChartsGroupViewModel(config.id, config.measurements))
+                Section(
+                    id: UUID(),
+                    sensorID: config.id,
+                    chartsCount: config.measurements.count,
+                    viewModel: ChartsGroupViewModel(config.id, config.measurements),
+                )
             )
         }
     }
@@ -62,7 +67,14 @@ final class ChartsScreenViewModel {
     private func userDidSelectSensors(_ list: [(SensorID, SensorName, [Measurement])]) {
         sensorsListPopupIsPresented = false
         for (id, _, measurements) in list {
-            sections.append(Section(id: UUID(), sensorID:id, chartsCount: measurements.count, viewModel: ChartsGroupViewModel(id, measurements)))
+            sections.append(
+                Section(
+                    id: UUID(),
+                    sensorID:id,
+                    chartsCount: measurements.count,
+                    viewModel: ChartsGroupViewModel(id, measurements),
+                )
+            )
         }
         
         Task {

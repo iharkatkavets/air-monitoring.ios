@@ -24,17 +24,11 @@ struct SensorRow: View {
                 Spacer()
                 Text("last seen:")
                 Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
-                availabilityDot
+                AvailabilityDot(isOnline: item.isOnline)
             }
             .font(.caption)
             .foregroundStyle(.secondary)
         }
-    }
-    
-    private var availabilityDot: some View {
-        Circle()
-            .fill(item.isOnline ? Color.green : Color.red)
-            .frame(width: 8, height: 8)
     }
 }
     

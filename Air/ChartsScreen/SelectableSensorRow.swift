@@ -33,16 +33,10 @@ struct SelectableSensorRow: View {
                     Text(item.lastSeenTime.formatted(date: .numeric, time: .shortened))
                         .foregroundStyle(.secondary)
                         .font(.caption)
-                    availabilityDot
+                    AvailabilityDot(isOnline: item.isOnline)
                 }
             }
         }
-    }
-    
-    private var availabilityDot: some View {
-        Circle()
-            .fill(item.isOnline ? .green : .red)
-            .frame(width: 12, height: 12)
     }
 }
     

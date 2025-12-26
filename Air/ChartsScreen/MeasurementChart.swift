@@ -16,9 +16,16 @@ struct MeasurementChart: View {
             chartHeader
             chart
         }
+        .opacity(viewModel.isLoading || viewModel.errorMessage != nil ? 0.2 : 1.0)
+        .overlay {
+            if viewModel.isLoading {
+                ProgressView()
+            }
+        }
+        .overlay { errorView }
         .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
     }
@@ -63,5 +70,41 @@ struct MeasurementChart: View {
         }
         .chartYScale(domain: .automatic(includesZero: false))
         .chartXScale(domain: viewModel.startDate...viewModel.endDate, type: .linear)
+    }
+    
+    @ViewBuilder
+    private var errorView: some View {
+        if let errorMessage = viewModel.errorMessage {
+            VStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 32, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                
+                Text("Something went wrong")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                
+                Text(errorMessage)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                
+                Button(action: viewModel.userDidPressRetryAfterError) {
+                    Text("Retry")
+                        .font(.callout.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.secondary)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
+            .shadow(radius: 8)
+            .padding()
+        }
     }
 }

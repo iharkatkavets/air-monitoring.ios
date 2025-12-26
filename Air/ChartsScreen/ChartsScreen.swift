@@ -52,8 +52,7 @@ struct ChartsScreen: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             } header: {
-               Text(s.sensorID)
-                    .foregroundStyle(.white)
+                listHeader(s.sensorID)
                     .listRowInsets(EdgeInsets(top: 0, leading: 32, bottom: -16, trailing: 32))
             }
         }
@@ -69,6 +68,13 @@ struct ChartsScreen: View {
                     }
             }
         )
+    }
+    
+    private func listHeader(_ sensorID: String) -> some View {
+        HStack {
+            Text(sensorID)
+                .foregroundStyle(.white)
+        }
     }
     
     private var toolBarPlusButton: some ToolbarContent {

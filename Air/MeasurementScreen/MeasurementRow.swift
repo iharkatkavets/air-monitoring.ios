@@ -44,7 +44,7 @@ struct MeasurementRow: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.secondarySystemBackground))
         )
         .contentShape(Rectangle())
