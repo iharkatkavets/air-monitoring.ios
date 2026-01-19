@@ -12,5 +12,5 @@ struct Sensor: Hashable, Identifiable {
     let sensorId: SensorID
     let sensorName: SensorName
     let lastSeenTime: Date
-    let measurements: [Measurement]
+    let measurements: [SensorMeasurement]
 }

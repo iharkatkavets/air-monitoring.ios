@@ -28,10 +28,14 @@ final class MeasurementChartViewModel {
     }
     var errorMessage: String? = nil
     private let onRetryAction: ()->Void
+    private let onCloseAction: (SensorMeasurement)->Void
+    private let measurement: SensorMeasurement
 
-    init(chartTitle: String, onRetryAction: @escaping ()->Void) {
+    init(measurement: SensorMeasurement, chartTitle: String, onRetryAction: @escaping ()->Void, onDeleteAction: @escaping (SensorMeasurement)->Void) {
+        self.measurement = measurement
         self.chartTitle = chartTitle
         self.onRetryAction = onRetryAction
+        self.onCloseAction = onDeleteAction
     }
     
     func append(_ value: MeasurementMark, _ color: Color) {
@@ -62,5 +66,9 @@ final class MeasurementChartViewModel {
     
     func userDidPressRetryAfterError() {
         onRetryAction()
+    }
+    
+    func userDidPressCloseButton() {
+        onCloseAction(measurement)
     }
 }

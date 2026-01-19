@@ -17,10 +17,10 @@ final class ChartsGroupViewModel: ObservableObject {
     var loadMoreButtonTitle: String = "Load more"
     var loadingTask: Task<Void, Never>?
     let log = Logger()
-    @Published var chartsViewModels = [Measurement: MeasurementChartViewModel]()
+    @Published var chartsViewModels = [SensorMeasurement: MeasurementChartViewModel]()
     let sensorID: SensorID
-    private let measurements: [Measurement]
-    let chartsCount: Int
+    private let measurements: [SensorMeasurement]
+    @Published var chartsCount: Int
     private var assignedColors = [String: Color]()
     let availableColors: [Color] = [
         Color(hex: "#1F77B4"), // Blue
@@ -35,17 +35,33 @@ final class ChartsGroupViewModel: ObservableObject {
         Color(hex: "#7F7F7F")  // Gray
     ]
     private var isFetchErrorOccured = true
-    
-    init(_ sensorID: SensorID, _ measurements: [Measurement]) {
+    var height: CGFloat
+    private let heightPerChart: CGFloat
+    private let onDeleteMeasurementAction: (SensorMeasurement)->Void
+    private let onDeleteGroupAction: ()->Void
+
+    init(_ sensorID: SensorID,
+         _ measurements: [SensorMeasurement],
+         heightPerChart: CGFloat,
+         onDeleteMeasurementAction: @escaping (SensorMeasurement)->Void,
+         onDeleteGroupAction: @escaping ()->Void) {
         self.sensorID = sensorID
         self.measurements = measurements
         self.chartsCount = measurements.count
+        self.heightPerChart = heightPerChart
+        self.onDeleteMeasurementAction = onDeleteMeasurementAction
+        self.onDeleteGroupAction = onDeleteGroupAction
+        self.height = CGFloat(measurements.count)*heightPerChart
         
         measurements.forEach {
             chartsViewModels[$0] = MeasurementChartViewModel(
+                measurement: $0,
                 chartTitle: $0,
                 onRetryAction: { [weak self] in
                     self?.userDidPressTryAgain()
+                },
+                onDeleteAction: { [weak self] in
+                    self?.userDidPressDeleteMeasurement($0)
                 })
         }
     }
@@ -123,6 +139,16 @@ final class ChartsGroupViewModel: ObservableObject {
     private func userDidPressTryAgain() {
         apiClient = APIClientImpl(server: AppSettings.serverDomain)
         fetchMeasurements()
+    }
+    
+    private func userDidPressDeleteMeasurement(_ measurement: SensorMeasurement) {
+        chartsViewModels[measurement] = nil
+        chartsCount = chartsViewModels.count
+        height = CGFloat(chartsViewModels.count)*heightPerChart
+        onDeleteMeasurementAction(measurement)
+        if chartsCount == 0 {
+            onDeleteGroupAction()
+        }
     }
 }
 

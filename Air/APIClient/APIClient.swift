@@ -10,7 +10,7 @@ import Foundation
 typealias ServerDomain = String
 typealias SensorID = String
 typealias SensorName = String
-typealias Measurement = String
+typealias SensorMeasurement = String
 
 fileprivate struct SettingsResponse: Decodable {
     struct Item: Decodable {
@@ -171,7 +171,7 @@ final class APIClientImpl: APIClient {
             let sensorId: String
             let sensorName: String
             let lastSeen: Date
-            let measurements: [Measurement]
+            let measurements: [SensorMeasurement]
             
             enum CodingKeys: String, CodingKey {
                 case sensorId = "sensor_id"

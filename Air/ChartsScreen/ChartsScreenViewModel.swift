@@ -14,7 +14,7 @@ import Collections
 @Observable
 final class ChartsScreenViewModel {
     struct Section: Identifiable {
-        let id: UUID
+        let id: SectionID
         let sensorID: SensorID
         let chartsCount: Int
         let viewModel: ChartsGroupViewModel
@@ -32,6 +32,8 @@ final class ChartsScreenViewModel {
             self?.userDidSelectSensors($0)
         })
     var sections = [Section]()
+    @ObservationIgnored
+    var heightPerChart: CGFloat = 300.0
 
     init() { }
     
@@ -40,15 +42,8 @@ final class ChartsScreenViewModel {
             return
         }
         
-        for config in AppSettings.sensors {
-            sections.append(
-                Section(
-                    id: UUID(),
-                    sensorID: config.id,
-                    chartsCount: config.measurements.count,
-                    viewModel: ChartsGroupViewModel(config.id, config.measurements),
-                )
-            )
+        for section in ChartsConfigStorage.load() {
+            addSection(section.id, section.sensorID, section.measurements)
         }
     }
     
@@ -64,26 +59,35 @@ final class ChartsScreenViewModel {
         sensorsListPopupIsPresented = true
     }
     
-    private func userDidSelectSensors(_ list: [(SensorID, SensorName, [Measurement])]) {
+    private func userDidSelectSensors(_ list: [(SensorID, SensorName, [SensorMeasurement])]) {
         sensorsListPopupIsPresented = false
-        for (id, _, measurements) in list {
-            sections.append(
-                Section(
-                    id: UUID(),
-                    sensorID:id,
-                    chartsCount: measurements.count,
-                    viewModel: ChartsGroupViewModel(id, measurements),
-                )
+        for (sensorID, _, measurements) in list {
+            let sectionID = UUID().uuidString
+            addSection(sectionID, sensorID, measurements)
+            ChartsConfigStorage.add(sectionID, sensorID, measurements)
+        }
+    }
+    
+    private func addSection(_ sectionID: SectionID, _ sensorID: SensorID, _ measurements: [SensorMeasurement]) {
+        let vm = ChartsGroupViewModel(
+            sensorID,
+            measurements,
+            heightPerChart: heightPerChart,
+            onDeleteMeasurementAction: { measurement in
+                ChartsConfigStorage.removeMeasurement(measurement, in: sectionID)
+            },
+            onDeleteGroupAction: { [weak self] in
+                ChartsConfigStorage.removeSection(sectionID)
+                self?.sections.removeAll(where: { $0.id == sectionID })
+            })
+        sections.append(
+            Section(
+                id: sectionID,
+                sensorID: sensorID,
+                chartsCount: measurements.count,
+                viewModel: vm
             )
-        }
-        
-        Task {
-            var config = [AppSettings.SensorConfig]()
-            for (id, name, measurements) in list {
-                config.append(.init(id: id, name: name, measurements: measurements))
-            }
-            AppSettings.sensors += config
-        }
+        )
     }
 }
 

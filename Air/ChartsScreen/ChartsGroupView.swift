@@ -9,17 +9,15 @@ import SwiftUI
 
 struct ChartsGroupView: View {
     let spacing: CGFloat
-    let height: CGFloat
     @ObservedObject var viewModel: ChartsGroupViewModel
     
     var body: some View {
         VStack(spacing: spacing) {
             ForEach(viewModel.chartsViewModels.keys.sorted(), id: \.self) {
                 MeasurementChart(viewModel: viewModel.chartsViewModels[$0]!)
-                    .frame(height: (height-CGFloat(viewModel.chartsCount-1)*spacing)/CGFloat(viewModel.chartsCount))
             }
         }
-        .frame(height: height)
+        .frame(height: viewModel.height)
         .task {
             viewModel.viewDidTriggerOnAppear()
         }

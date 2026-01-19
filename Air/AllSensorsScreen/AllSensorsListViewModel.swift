@@ -17,7 +17,7 @@ final class AllSensorsListViewModel {
         let sensorID: SensorID
         let sensorName: SensorName
         let lastSeenTime: Date
-        let measurements: [Measurement]
+        let measurements: [SensorMeasurement]
         let isOnline: Bool
     }
     

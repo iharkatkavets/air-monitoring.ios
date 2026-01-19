@@ -9,28 +9,37 @@ import SwiftUI
 import Charts
 
 struct MeasurementChart: View {
-    var viewModel: MeasurementChartViewModel
+    @State var viewModel: MeasurementChartViewModel
+    private let secondary = Color.white.opacity(0.6)
+    let darkSecondaryBackground = Color(
+        red: 28/255,
+        green: 28/255,
+        blue: 30/255
+    )
     
     var body: some View {
-        VStack(alignment: .trailing, spacing: 4) {
-            chartHeader
-            chart
+        ZStack(alignment: .topTrailing) {
+            VStack(alignment: .trailing, spacing: 4) {
+                chartHeader
+                chart
+            }
+            .padding(16)
+            .opacity(viewModel.isLoading || viewModel.errorMessage != nil ? 0.2 : 1.0)
+            closeButton
         }
-        .opacity(viewModel.isLoading || viewModel.errorMessage != nil ? 0.2 : 1.0)
         .overlay {
             if viewModel.isLoading {
                 ProgressView()
             }
         }
         .overlay { errorView }
-        .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(uiColor: .secondarySystemBackground))
+                .fill(darkSecondaryBackground)
         )
     }
     
-    var chartHeader: some View {
+    private var chartHeader: some View {
         HStack(spacing: 8) {
             yAxisTitle
             Spacer()
@@ -40,19 +49,19 @@ struct MeasurementChart: View {
         }
     }
     
-    var yAxisTitle: some View {
+    private var yAxisTitle: some View {
         Text(viewModel.yAxisTitle)
             .font(.footnote.weight(.regular))
-            .foregroundStyle(.primary.opacity(0.8))
+            .foregroundStyle(.white.opacity(0.8))
     }
 
-    var chartTitle: some View {
+    private var chartTitle: some View {
         Text(viewModel.chartTitle)
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.primary.opacity(0.8))
+            .foregroundStyle(.white.opacity(0.8))
     }
     
-    var chart: some View {
+    private var chart: some View {
         Chart(viewModel.values) { item in
             LineMark(
                 x: .value(viewModel.xAxisTitle, item.date),
@@ -78,7 +87,7 @@ struct MeasurementChart: View {
             VStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 32, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(secondary)
                 
                 Text("Something went wrong")
                     .font(.headline)
@@ -86,7 +95,7 @@ struct MeasurementChart: View {
                 
                 Text(errorMessage)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(secondary)
                     .multilineTextAlignment(.center)
                 
                 Button(action: viewModel.userDidPressRetryAfterError) {
@@ -95,7 +104,7 @@ struct MeasurementChart: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.secondary)
+                .tint(secondary)
             }
             .padding(24)
             .frame(maxWidth: .infinity)
@@ -106,5 +115,31 @@ struct MeasurementChart: View {
             .shadow(radius: 8)
             .padding()
         }
+    }
+    
+    private var closeButton: some View {
+        Button(action: viewModel.userDidPressCloseButton) {
+            Image(systemName: "xmark")
+                .font(.system(size: 17, weight: .thin))
+                .foregroundStyle(.white.opacity(0.2))
+        }
+        .buttonStyle(.plain)
+        .frame(width: 44, height: 44)
+        .contentShape(Rectangle())
+    }
+}
+
+#Preview {
+    ZStack {
+        Color.black
+        
+        MeasurementChart(
+            viewModel: MeasurementChartViewModel(
+                measurement: "some_measurement",
+                chartTitle: "Measurements",
+                onRetryAction: {},
+                onDeleteAction: {_ in})
+        )
+        .frame(height: 300)
     }
 }

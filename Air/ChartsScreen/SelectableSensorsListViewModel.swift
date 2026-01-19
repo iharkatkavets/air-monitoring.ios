@@ -23,11 +23,11 @@ final class SelectableSensorsListViewModel: ObservableObject {
     var displaySensors = [DisplaySensor]()
     private lazy var apiClient = APIClientImpl(server: AppSettings.serverDomain)
     private let onError: (APIClientError) -> Void
-    private let onSelectSensors: ([(SensorID, SensorName, [Measurement])]) -> Void
+    private let onSelectSensors: ([(SensorID, SensorName, [SensorMeasurement])]) -> Void
     @Published var selectedSensors = Set<SensorID>()
     @Published var isLoading = false
     
-    init(onError: @escaping (APIClientError) -> Void, onSelectSensors: @escaping ([(SensorID, SensorName, [Measurement])]) -> Void) {
+    init(onError: @escaping (APIClientError) -> Void, onSelectSensors: @escaping ([(SensorID, SensorName, [SensorMeasurement])]) -> Void) {
         self.onError = onError
         self.onSelectSensors = onSelectSensors
     }
@@ -64,7 +64,7 @@ final class SelectableSensorsListViewModel: ObservableObject {
     
     func userDidPressDone() {
         var id2SensorIDMap = [String: SensorID]()
-        var sensorID2SensorMap = [SensorID: (SensorName, [Measurement])]()
+        var sensorID2SensorMap = [SensorID: (SensorName, [SensorMeasurement])]()
         for sensor in availableSensors {
             for measurement in sensor.measurements {
                 id2SensorIDMap[sensor.sensorId + "." + measurement] = sensor.sensorId
@@ -72,7 +72,7 @@ final class SelectableSensorsListViewModel: ObservableObject {
             id2SensorIDMap[sensor.sensorId] = sensor.sensorId
             sensorID2SensorMap[sensor.sensorId] = (sensor.sensorName, sensor.measurements)
         }
-        var resultIDs = [SensorID: [Measurement]]()
+        var resultIDs = [SensorID: [SensorMeasurement]]()
         for id in selectedSensors {
             let foundId = id2SensorIDMap[id]!
             let hasMeasurement = id.hasPrefix(foundId + ".")
@@ -83,7 +83,7 @@ final class SelectableSensorsListViewModel: ObservableObject {
                 resultIDs[foundId, default: []] += [String(measurement)]
             }
         }
-        var result = [(SensorID, SensorName, [Measurement])]()
+        var result = [(SensorID, SensorName, [SensorMeasurement])]()
         for (key, selectedMeasurements) in resultIDs {
             let (sensorName, allMeasurements) = sensorID2SensorMap[key]!
             if selectedMeasurements.isEmpty {

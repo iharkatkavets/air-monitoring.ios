@@ -14,7 +14,6 @@ struct ChartsScreen: View {
     @State var isNumberConentrationInfoPresented = false
     @State var isMassConcentrationInfoPresented = false
     @State var toobarButtonRect: CGRect = .zero
-    @State private var listHeight: CGFloat = 0
     var isAlertPresented: Binding<Bool> {
         Binding(
             get: { viewModel.errorMessage != nil },
@@ -47,7 +46,6 @@ struct ChartsScreen: View {
             Section {
                 ChartsGroupView(
                     spacing: 16,
-                    height: heightForGroupOfCharts(s.chartsCount),
                     viewModel: s.viewModel)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -60,14 +58,6 @@ struct ChartsScreen: View {
         .scrollIndicators(.hidden)
         .edgesIgnoringSafeArea(.horizontal)
         .listStyle(.plain)
-        .background(
-            GeometryReader { geo in
-                Color.clear
-                    .onChange(of: geo.size.height, initial: true) { _, newValue in
-                        listHeight = newValue
-                    }
-            }
-        )
     }
     
     private func listHeader(_ sensorID: String) -> some View {
@@ -91,9 +81,7 @@ struct ChartsScreen: View {
         }
     }
     
-    private func heightForGroupOfCharts(_ count: Int) -> CGFloat {
-        return CGFloat(count)*listHeight/2
-    }
+    
     
     @ViewBuilder
     private func errorViewIfNeeded() -> some View {

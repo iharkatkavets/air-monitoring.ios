@@ -9,12 +9,6 @@ import Foundation
 import Collections
 
 enum AppSettings {
-    struct SensorConfig: Identifiable, Codable {
-        let id: SensorID
-        let name: SensorName
-        let measurements: [Measurement]
-    }
-    
     
     @UserDefaultsValue("serverDomain")
     static var serverDomain: ServerDomain = ""
@@ -24,7 +18,4 @@ enum AppSettings {
     
     @UserDefaultsValue(ServerSettingKey.storeInterval)
     static var storeInterval: DurationSeconds = -1
-    
-    @UserDefaultsValue("sensors")
-    static var sensors: [SensorConfig] = []
 }
