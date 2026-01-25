@@ -102,18 +102,22 @@ final class APIClientImpl: APIClient {
             let stream = AsyncThrowingStream<[MeasurementSSE], any Error> { continuation in
                 let streamTask = Task.detached {
                     do {
-                        for try await line in asyncBytes.lines where line.hasPrefix("data: ") {
+                        for try await line in asyncBytes.lines {
+                            print("<-", line)
+                            guard line.hasPrefix("data: ") else { continue }
                             try Task.checkCancellation()
                             let jsonStr = line.dropFirst(5)
                             let dataValue = try decoder.decode(Event.self, from: jsonStr.data(using: .utf8)!)
                             continuation.yield(dataValue.items)
                         }
-                        print("async bytes done")
                         continuation.finish()
                     }
                     catch {
-                        if !error.isCancellationError {
-                            print("stream triggered error")
+                        if error.isCancellationError {
+                            print("stream is cancelled")
+                            continuation.finish()
+                        } else {
+                            print("stream triggered error %@", error as CVarArg)
                             continuation.finish(throwing: APIClientError.server("Server error. Try again later"))
                         }
                     }

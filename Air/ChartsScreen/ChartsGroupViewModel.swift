@@ -85,7 +85,7 @@ final class ChartsGroupViewModel: ObservableObject {
             do {
                 setIsLoading(true)
                 setError(nil)
-                for try await measurements in try await apiClient.fetchSensorStream(sensorID, 10) {
+                for try await measurements in try await apiClient.fetchSensorStream(sensorID, 15) {
                     try Task.checkCancellation()
                     appendValues(measurements)
                 }
