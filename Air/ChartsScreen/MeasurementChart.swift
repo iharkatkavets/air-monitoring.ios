@@ -25,7 +25,9 @@ struct MeasurementChart: View {
             }
             .padding(16)
             .opacity(viewModel.isLoading || viewModel.errorMessage != nil ? 0.2 : 1.0)
-            closeButton
+            if viewModel.closeAvailable {
+                closeButton
+            }
         }
         .overlay {
             if viewModel.isLoading {

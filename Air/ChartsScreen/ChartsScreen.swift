@@ -22,7 +22,7 @@ struct ChartsScreen: View {
     }
 
     var body: some View {
-        list()
+        list
         .onAppear { viewModel.viewDidTriggerOnAppear() }
         .navigationTitle("Live Charts")
         .toolbarTitleDisplayMode(.inline)
@@ -41,7 +41,7 @@ struct ChartsScreen: View {
         })
     }
     
-    private func list() -> some View {
+    private var list: some View {
         List(viewModel.sections) { s in
             Section {
                 ChartsGroupView(

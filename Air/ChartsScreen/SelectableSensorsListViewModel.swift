@@ -8,7 +8,6 @@
 import Combine
 import SwiftUI
 
-@MainActor
 final class SelectableSensorsListViewModel: ObservableObject {
     struct DisplaySensor: Hashable, Identifiable {
         var id: SensorID { sensorId }

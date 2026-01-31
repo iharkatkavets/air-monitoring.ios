@@ -9,7 +9,6 @@ import Combine
 import Foundation
 
 @Observable
-@MainActor
 final class ServerDomainViewModel  {
     var serverDomain: String = AppSettings.serverDomain
     var errorMessage: String?

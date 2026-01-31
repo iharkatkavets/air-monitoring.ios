@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SensorRow: View {
-    let item: AllSensorsListViewModel.DisplaySensor
+    let item: DisplaySensor
     let measurements: [String]
     
     var body: some View {
@@ -36,7 +36,7 @@ struct SensorRow: View {
     ZStack {
         Color.black
         SensorRow(
-            item: AllSensorsListViewModel.DisplaySensor(
+            item: DisplaySensor(
                 sensorID: "",
                 sensorName: "",
                 lastSeenTime: Date(),

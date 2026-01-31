@@ -14,12 +14,17 @@ struct RootView: View {
         TabView {
             Tab("Sensors", systemImage: "sensor.fill") {
                 NavigationStack {
-                    AllSensorsListView(viewModel: viewModel.allSensorsListViewModel)
+                    SensorLiveListView(viewModel: viewModel.sensorLiveListViewModel)
                 }
             }
             Tab("Charts", systemImage: "chart.xyaxis.line") {
                 NavigationStack {
                     ChartsScreen(viewModel: viewModel.chartsScreenViewModel)
+                }
+            }
+            Tab("History", systemImage: "clock.fill") {
+                NavigationStack {
+                    SensorHistoryListView(viewModel: viewModel.sensorHistoryListViewModel)
                 }
             }
             Tab("Settings", systemImage: "gearshape.fill") {

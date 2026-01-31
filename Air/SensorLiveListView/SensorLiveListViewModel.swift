@@ -1,34 +1,22 @@
 //
-//  AllSensorsListViewModel.swift
+//  SensorLiveListViewModel.swift
 //  Air
 //
-//  Created by Ihar Katkavets on 12/12/2025.
+//  Created by Ihar Katkavets on 25/01/2026.
 //
 
-import Combine
 import Foundation
+import Combine
 
-
-@MainActor
 @Observable
-final class AllSensorsListViewModel {
-    struct DisplaySensor: Identifiable {
-        var id: SensorID { sensorID }
-        let sensorID: SensorID
-        let sensorName: SensorName
-        let lastSeenTime: Date
-        let measurements: [SensorMeasurement]
-        let isOnline: Bool
-    }
-    
+final class SensorLiveListViewModel {
     var displaySensors: [DisplaySensor] = []
     var isLoading: Bool = true
     var errorMessage: String?
-    
     @ObservationIgnored
     private lazy var apiClient = APIClientImpl(server: AppSettings.serverDomain)
     @ObservationIgnored
-    private var availableSensors: [Sensor] = []
+    private var availableSensors: [SensorID: Sensor] = [:]
     var obsevationToken: AnyObject?
     @ObservationIgnored
     private var domainUpdatedTask: Task<Void, Never>?
@@ -56,6 +44,10 @@ final class AllSensorsListViewModel {
         await fetchSensors()
     }
     
+    func makeSensorChartsViewModel(_ sensorID: SensorID) -> SensorChartsViewModel {
+        SensorChartsViewModel(sensorID, availableSensors[sensorID]?.measurements ?? [])
+    }
+    
     private func fetchSensors() async {
         defer {
             isLoading = false
@@ -65,9 +57,9 @@ final class AllSensorsListViewModel {
             errorMessage = nil
             displaySensors.removeAll(keepingCapacity: true)
             apiClient = APIClientImpl(server: AppSettings.serverDomain)
-            availableSensors = try await apiClient.fetchSensors()
             let now = Date.now
-            for s in availableSensors {
+            for s in try await apiClient.fetchSensors(){
+                availableSensors[s.sensorId] = s
                 displaySensors.append(
                     DisplaySensor(
                         sensorID: s.sensorId,

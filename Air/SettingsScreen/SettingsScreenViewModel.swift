@@ -9,7 +9,6 @@ import Foundation
 import Combine
 
 
-@MainActor
 @Observable
 final class SettingsScreenViewModel {
     var serverDomain = ""

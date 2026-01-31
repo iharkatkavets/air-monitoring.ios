@@ -7,10 +7,8 @@
 
 import Combine
 import Foundation
-import os.log
 import Collections
 
-@MainActor
 @Observable
 final class ChartsScreenViewModel {
     struct Section: Identifiable {
@@ -21,8 +19,6 @@ final class ChartsScreenViewModel {
     }
     var isLoading = true
     var errorMessage: String? = nil
-    var loadMoreButtonTitle: String = "Load more"
-    let log = Logger()
     var sensorsListPopupIsPresented: Bool = false
     @ObservationIgnored
     lazy var sensorsListPopupViewModel = SelectableSensorsListViewModel(

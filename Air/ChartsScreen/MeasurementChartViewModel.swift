@@ -30,13 +30,20 @@ final class MeasurementChartViewModel {
     private let onRetryAction: ()->Void
     private let onCloseAction: (SensorMeasurement)->Void
     private let measurement: SensorMeasurement
+    let closeAvailable: Bool
 
-    init(measurement: SensorMeasurement, chartTitle: String, onRetryAction: @escaping ()->Void, onDeleteAction: @escaping (SensorMeasurement)->Void) {
-        self.measurement = measurement
-        self.chartTitle = chartTitle
-        self.onRetryAction = onRetryAction
-        self.onCloseAction = onDeleteAction
-    }
+    init(
+        measurement: SensorMeasurement,
+        chartTitle: String,
+        closeAvailable: Bool = true,
+        onRetryAction: @escaping ()->Void,
+        onDeleteAction: @escaping (SensorMeasurement)->Void) {
+            self.measurement = measurement
+            self.chartTitle = chartTitle
+            self.closeAvailable = closeAvailable
+            self.onRetryAction = onRetryAction
+            self.onCloseAction = onDeleteAction
+        }
     
     func append(_ value: MeasurementMark, _ color: Color) {
         if value.date < endDate {

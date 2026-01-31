@@ -8,7 +8,6 @@
 import Combine
 import SwiftUI
 
-@MainActor
 @Observable
 final class MeasurementsScreenViewModel {
     var measurements: [MeasurementData] = []

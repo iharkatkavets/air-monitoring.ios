@@ -12,7 +12,6 @@ enum TabTag: Hashable {
     case sensors, charts, settings
 }
 
-@MainActor
 @Observable
 final class RootViewModel {
     @ObservationIgnored
@@ -20,7 +19,9 @@ final class RootViewModel {
     @ObservationIgnored
     lazy var chartsScreenViewModel = ChartsScreenViewModel()
     @ObservationIgnored
-    lazy var allSensorsListViewModel = AllSensorsListViewModel()
+    lazy var sensorHistoryListViewModel = SensorHistoryListViewModel()
+    @ObservationIgnored
+    lazy var sensorLiveListViewModel = SensorLiveListViewModel()
     
     init() { }
 }
