@@ -34,22 +34,12 @@ struct SensorChartsView: View {
     }
     
     private var list: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                ForEach(viewModel.chartsViewModels.keys.sorted(), id: \.self) {
-                    MeasurementChart(viewModel: viewModel.chartsViewModels[$0]!)
-                        .frame(height: 300)
-                }
-            }
+        List(viewModel.chartsViewModels.keys.sorted(), id: \.self) {
+            MeasurementChart(viewModel: viewModel.chartsViewModels[$0]!)
+                .listRowInsets(EdgeInsets())
+                .frame(height: 300)
         }
-        .padding(.horizontal, 16)
-    }
-    
-    private func listHeader(_ sensorID: String) -> some View {
-        HStack {
-            Text(sensorID)
-                .foregroundStyle(.white)
-        }
+        .listRowSpacing(16)
     }
     
     @ViewBuilder
