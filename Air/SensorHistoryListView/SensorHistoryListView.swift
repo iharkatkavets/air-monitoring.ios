@@ -9,14 +9,14 @@ import SwiftUI
 
 struct SensorHistoryListView: View {
     let viewModel: SensorHistoryListViewModel
+
+    private struct MeasurementsRoute: Hashable {
+        let sensorID: String
+    }
     
     var body: some View {
         List(viewModel.displaySensors) { sensor in
-            NavigationLink {
-                MeasurementsScreen(
-                    title: sensor.sensorID,
-                    viewModel: MeasurementsScreenViewModel(sensor.sensorID))
-            } label: {
+            NavigationLink(value: MeasurementsRoute(sensorID: sensor.sensorID)) {
                 SensorRow(item: sensor, measurements: sensor.measurements)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 8)
@@ -31,6 +31,11 @@ struct SensorHistoryListView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Hsitory")
         .toolbarTitleDisplayMode(.inline)
+        .navigationDestination(for: MeasurementsRoute.self) { route in
+            MeasurementsScreen(
+                title: route.sensorID,
+                viewModel: MeasurementsScreenViewModel(route.sensorID))
+        }
         .refreshable {
             await viewModel.refresh()
         }

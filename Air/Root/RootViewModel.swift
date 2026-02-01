@@ -8,10 +8,6 @@
 import Foundation
 import Combine
 
-enum TabTag: Hashable {
-    case sensors, charts, settings
-}
-
 @Observable
 final class RootViewModel {
     @ObservationIgnored
@@ -28,11 +24,17 @@ final class RootViewModel {
 
     init() { }
     
+    deinit {
+        domainUpdatedTask?.cancel()
+    }
+    
     func viewDidTriggerOnAppear() {
         domainUpdatedTask = Task { [weak self] in
             let notificationCenter = NotificationCenter.default
             for await _ in notificationCenter.notifications(named: .domainUpdated, object: nil) {
-                self?.popToRoot.send()
+                await MainActor.run {
+                    self?.popToRoot.send()
+                }
             }
         }
     }

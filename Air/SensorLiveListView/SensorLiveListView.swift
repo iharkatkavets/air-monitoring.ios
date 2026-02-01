@@ -9,13 +9,14 @@ import SwiftUI
 
 struct SensorLiveListView: View {
     @State var viewModel: SensorLiveListViewModel
+
+    private struct SensorChartsRoute: Hashable {
+        let sensorID: String
+    }
     
     var body: some View {
         List(viewModel.displaySensors) { sensor in
-            NavigationLink {
-                SensorChartsView(
-                    viewModel: viewModel.makeSensorChartsViewModel(sensor.sensorID))
-            } label: {
+            NavigationLink(value: SensorChartsRoute(sensorID: sensor.sensorID)) {
                 SensorRow(item: sensor, measurements: sensor.measurements)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 8)
@@ -30,6 +31,10 @@ struct SensorLiveListView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Sensors")
         .toolbarTitleDisplayMode(.inline)
+        .navigationDestination(for: SensorChartsRoute.self) { route in
+            SensorChartsView(
+                viewModel: viewModel.makeSensorChartsViewModel(route.sensorID))
+        }
         .refreshable {
             await viewModel.refresh()
         }

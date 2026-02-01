@@ -11,6 +11,7 @@ struct RootView: View {
     @State private var sensorsPath = NavigationPath()
     @State private var chartsPath  = NavigationPath()
     @State private var historyPath = NavigationPath()
+    @State private var settingsPath = NavigationPath()
     @State var viewModel: RootViewModel
     
     var body: some View {
@@ -31,20 +32,20 @@ struct RootView: View {
                 }
             }
             Tab("Settings", systemImage: "gearshape.fill") {
-                NavigationStack {
+                NavigationStack(path: $settingsPath) {
                     SettingsScreen(viewModel: viewModel.settingsViewModel)
                 }
             }
         }
         .onAppear(perform: viewModel.viewDidTriggerOnAppear)
         .onReceive(viewModel.popToRoot) { _ in
-            popFirstThreeToRoot()
+            popToRoot()
         }
         .preferredColorScheme(.dark)
         .background(Color.black)
     }
     
-    private func popFirstThreeToRoot() {
+    private func popToRoot() {
         sensorsPath = NavigationPath()
         chartsPath  = NavigationPath()
         historyPath = NavigationPath()

@@ -16,7 +16,13 @@ final class SensorLiveListViewModel {
         case loaded([DisplaySensor])
         case failed(String)
     }
-    var displaySensors: [DisplaySensor] = []
+    var displaySensors: [DisplaySensor] {
+        if case .loaded(let array) = state {
+            return array
+        } else {
+            return []
+        }
+    }
     var isLoading: Bool {
         if case .loading = state {
             return true
@@ -71,11 +77,13 @@ final class SensorLiveListViewModel {
     private func fetchSensors() async {
         do {
             state = .loading
-            displaySensors.removeAll(keepingCapacity: true)
             let now = Date.now
-            for s in try await apiClient.fetchSensors() {
+            var fetchedSensors = try await apiClient.fetchSensors()
+            fetchedSensors.sort { $0.sensorId < $1.sensorId }
+            var sensors = [DisplaySensor]()
+            for s in fetchedSensors {
                 availableSensors[s.sensorId] = s
-                displaySensors.append(
+                sensors.append(
                     DisplaySensor(
                         sensorID: s.sensorId,
                         sensorName: s.sensorName,
@@ -85,7 +93,7 @@ final class SensorLiveListViewModel {
                     )
                 )
             }
-            state = .loaded(displaySensors)
+            state = .loaded(sensors)
         }
         catch {
             if !error.isCancellationError {

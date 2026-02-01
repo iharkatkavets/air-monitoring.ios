@@ -49,6 +49,8 @@ struct SettingsScreen: View {
     
     var viewModel: SettingsScreenViewModel
     @State private var activeSheet: ActiveSheet?
+    
+    private struct ServerDomainRoute: Hashable { }
 
     var body: some View {
         ZStack {
@@ -81,11 +83,14 @@ struct SettingsScreen: View {
         }
         .navigationTitle("Settings")
         .toolbarTitleDisplayMode(.inline)
+        .navigationDestination(for: ServerDomainRoute.self) { _ in
+            ServerDomainView(viewModel: viewModel.makeServerDomainViewModel())
+        }
         .onAppear(perform: viewModel.viewDidTriggerOnAppear)
     }
     
     private var serverDomain: some View {
-        NavigationLink(destination: ServerDomainView(viewModel: viewModel.makeServerDomainViewModel())) {
+        NavigationLink(value: ServerDomainRoute()) {
             HStack {
                 Text("Server Domain: ")
                 Spacer()
