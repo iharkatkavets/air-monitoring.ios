@@ -10,18 +10,38 @@ import Combine
 
 @Observable
 final class SensorLiveListViewModel {
+    enum State {
+        case idle
+        case loading
+        case loaded([DisplaySensor])
+        case failed(String)
+    }
     var displaySensors: [DisplaySensor] = []
-    var isLoading: Bool = true
-    var errorMessage: String?
+    var isLoading: Bool {
+        if case .loading = state {
+            return true
+        } else {
+            return false
+        }
+    }
+    var errorMessage: String? {
+        if case .failed(let errorMessage) = state {
+            return errorMessage
+        } else {
+            return nil
+        }
+    }
     @ObservationIgnored
-    private lazy var apiClient = APIClientImpl(server: AppSettings.serverDomain)
+    private let apiClient: APIClient
     @ObservationIgnored
     private var availableSensors: [SensorID: Sensor] = [:]
     var obsevationToken: AnyObject?
     @ObservationIgnored
     private var domainUpdatedTask: Task<Void, Never>?
+    var state: State = .idle
 
-    init() {
+    init(_ apiClient: APIClient = APIClientImpl(server: AppSettings.serverDomain)) {
+        self.apiClient = apiClient
         domainUpdatedTask = Task { [weak self] in
             let notificationCenter = NotificationCenter.default
             for await _ in notificationCenter.notifications(named: .domainUpdated, object: nil) {
@@ -34,8 +54,8 @@ final class SensorLiveListViewModel {
         domainUpdatedTask?.cancel()
     }
     
-    func viewDidTriggerOnAppear() {
-        Task {
+    func viewDidTriggerOnAppear() async {
+        if case .idle = state {
             await fetchSensors()
         }
     }
@@ -49,16 +69,11 @@ final class SensorLiveListViewModel {
     }
     
     private func fetchSensors() async {
-        defer {
-            isLoading = false
-        }
         do {
-            isLoading = true
-            errorMessage = nil
+            state = .loading
             displaySensors.removeAll(keepingCapacity: true)
-            apiClient = APIClientImpl(server: AppSettings.serverDomain)
             let now = Date.now
-            for s in try await apiClient.fetchSensors(){
+            for s in try await apiClient.fetchSensors() {
                 availableSensors[s.sensorId] = s
                 displaySensors.append(
                     DisplaySensor(
@@ -70,10 +85,11 @@ final class SensorLiveListViewModel {
                     )
                 )
             }
+            state = .loaded(displaySensors)
         }
         catch {
             if !error.isCancellationError {
-                self.errorMessage = error.message
+                state = .failed(error.message)
             }
         }
     }

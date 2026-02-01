@@ -7,6 +7,24 @@
 
 import SwiftUI
 
+fileprivate let availableColors: [Color] = [
+    Color(hex: "#1F77B4"), // Blue
+    Color(hex: "#FF7F0E"), // Orange
+    Color(hex: "#2CA02C"), // Green
+    Color(hex: "#D62728"), // Red
+    Color(hex: "#9467BD"), // Purple
+    Color(hex: "#17BECF"), // Cyan
+    Color(hex: "#BCBD22"), // Olive
+    Color(hex: "#E377C2"), // Pink
+    Color(hex: "#8C564B"), // Brown
+    Color(hex: "#7F7F7F")  // Gray
+]
+
+func chartColor(_ i: Int) -> Color {
+    availableColors[i%availableColors.count]
+}
+
+
 extension Color {
     init(hex: String) {
         var hex = hex.trimmingCharacters(in: .whitespacesAndNewlines)

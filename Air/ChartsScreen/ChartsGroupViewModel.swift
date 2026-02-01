@@ -11,8 +11,7 @@ import Combine
 import os.log
 
 final class ChartsGroupViewModel: ObservableObject {
-    var isLoading = false
-    private lazy var apiClient: APIClient = APIClientImpl(server: AppSettings.serverDomain)
+    private let apiClient: APIClient
     var loadingTask: Task<Void, Never>?
     let log = Logger()
     @Published var chartsViewModels = [SensorMeasurement: MeasurementChartViewModel]()
@@ -20,18 +19,6 @@ final class ChartsGroupViewModel: ObservableObject {
     private let measurements: [SensorMeasurement]
     @Published var chartsCount: Int
     private var assignedColors = [String: Color]()
-    let availableColors: [Color] = [
-        Color(hex: "#1F77B4"), // Blue
-        Color(hex: "#FF7F0E"), // Orange
-        Color(hex: "#2CA02C"), // Green
-        Color(hex: "#D62728"), // Red
-        Color(hex: "#9467BD"), // Purple
-        Color(hex: "#17BECF"), // Cyan
-        Color(hex: "#BCBD22"), // Olive
-        Color(hex: "#E377C2"), // Pink
-        Color(hex: "#8C564B"), // Brown
-        Color(hex: "#7F7F7F")  // Gray
-    ]
     private var isFetchErrorOccured = true
     var height: CGFloat
     private let heightPerChart: CGFloat
@@ -41,11 +28,13 @@ final class ChartsGroupViewModel: ObservableObject {
     init(_ sensorID: SensorID,
          _ measurements: [SensorMeasurement],
          heightPerChart: CGFloat,
+         apiClient: APIClient = APIClientImpl(server: AppSettings.serverDomain),
          onDeleteMeasurementAction: @escaping (SensorMeasurement)->Void,
          onDeleteGroupAction: @escaping ()->Void) {
         self.sensorID = sensorID
         self.measurements = measurements
         self.chartsCount = measurements.count
+        self.apiClient = apiClient
         self.heightPerChart = heightPerChart
         self.onDeleteMeasurementAction = onDeleteMeasurementAction
         self.onDeleteGroupAction = onDeleteGroupAction
@@ -64,6 +53,10 @@ final class ChartsGroupViewModel: ObservableObject {
         }
     }
     
+    deinit {
+        loadingTask?.cancel()
+    }
+    
     func viewDidTriggerOnAppear() {
         if loadingTask == nil || isFetchErrorOccured || loadingTask?.isCancelled == true {
             fetchMeasurements()
@@ -76,21 +69,22 @@ final class ChartsGroupViewModel: ObservableObject {
     
     func fetchMeasurements() {
         loadingTask?.cancel()
-        loadingTask = Task { [unowned self] in
+        loadingTask = Task { [weak self, apiClient, sensorID] in
             defer {
-                setIsLoading(false)
+                self?.setIsLoading(false)
+                self?.loadingTask = nil
             }
             do {
-                setIsLoading(true)
-                setError(nil)
+                self?.setIsLoading(true)
+                self?.setError(nil)
                 for try await measurements in try await apiClient.fetchSensorStream(sensorID, 15) {
                     try Task.checkCancellation()
-                    appendValues(measurements)
+                    self?.appendValues(measurements)
                 }
             }
             catch {
                 if !error.isCancellationError {
-                    setError((error as? APIClientError)?.message)
+                    self?.setError((error as? APIClientError)?.message)
                 }
             }
         }
@@ -101,7 +95,7 @@ final class ChartsGroupViewModel: ObservableObject {
             let measurement = v.measurement.lowercased()
             let vm = chartsViewModels[measurement]
             let parameter = v.parameter ?? ""
-            let color = assignedColors[parameter, default: availableColors[assignedColors.count]]
+            let color = assignedColors[parameter, default: chartColor(assignedColors.count)]
             assignedColors[parameter] = color
             let mark = MeasurementMark(date: v.timestamp, value: v.value, parameter: parameter, color: color)
             vm?.yAxisTitle = v.unit
@@ -117,7 +111,6 @@ final class ChartsGroupViewModel: ObservableObject {
     }
     
     private func setIsLoading(_ value: Bool) {
-        isLoading = value
         for (_, vm) in chartsViewModels {
             vm.setIsLoading(value)
         }
@@ -127,7 +120,6 @@ final class ChartsGroupViewModel: ObservableObject {
         isFetchErrorOccured = false
         loadingTask?.cancel()
         await loadingTask?.value
-        apiClient = APIClientImpl(server: AppSettings.serverDomain)
         for (_, vm) in chartsViewModels {
             vm.removeAll()
         }
@@ -135,7 +127,6 @@ final class ChartsGroupViewModel: ObservableObject {
     }
     
     private func userDidPressTryAgain() {
-        apiClient = APIClientImpl(server: AppSettings.serverDomain)
         fetchMeasurements()
     }
     

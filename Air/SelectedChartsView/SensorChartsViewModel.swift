@@ -26,18 +26,6 @@ final class SensorChartsViewModel: Sendable {
     var chartsCount: Int
     @ObservationIgnored
     private var assignedColors = [String: Color]()
-    let availableColors: [Color] = [
-        Color(hex: "#1F77B4"), // Blue
-        Color(hex: "#FF7F0E"), // Orange
-        Color(hex: "#2CA02C"), // Green
-        Color(hex: "#D62728"), // Red
-        Color(hex: "#9467BD"), // Purple
-        Color(hex: "#17BECF"), // Cyan
-        Color(hex: "#BCBD22"), // Olive
-        Color(hex: "#E377C2"), // Pink
-        Color(hex: "#8C564B"), // Brown
-        Color(hex: "#7F7F7F")  // Gray
-    ]
     private var isFetchErrorOccured = true
 
     init(_ sensorID: SensorID,
@@ -64,7 +52,10 @@ final class SensorChartsViewModel: Sendable {
     }
 
     func userDidPressTryAgain() {
-        errorMessage = nil
+        Task {
+            errorMessage = nil
+            await refresh()
+        }
     }
     
     func viewDidTriggerOnAppear() async {
@@ -104,7 +95,7 @@ final class SensorChartsViewModel: Sendable {
             let measurement = v.measurement.lowercased()
             let vm = chartsViewModels[measurement]
             let parameter = v.parameter ?? ""
-            let color = assignedColors[parameter, default: availableColors[assignedColors.count]]
+            let color = assignedColors[parameter, default: chartColor(assignedColors.count)]
             assignedColors[parameter] = color
             let mark = MeasurementMark(date: v.timestamp, value: v.value, parameter: parameter, color: color)
             vm?.yAxisTitle = v.unit

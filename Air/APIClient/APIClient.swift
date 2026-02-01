@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import Synchronization
 
 typealias ServerDomain = String
 typealias SensorID = String
 typealias SensorName = String
 typealias SensorMeasurement = String
 
-fileprivate struct SettingsResponse: Decodable {
+nonisolated fileprivate struct SettingsResponse: Decodable {
     struct Item: Decodable {
         let key: String
         let value: String
@@ -36,22 +37,28 @@ enum APIClientError: Swift.Error {
     }
 }
 
-protocol APIClient: Sendable {
+nonisolated protocol APIClient: Sendable {
     var server: ServerDomain { get }
     func fetchMeasurementsPage(_ sensorID: SensorID, _ cursor: NextPageCursor?) async throws(APIClientError) -> MeasurementsPage
     func fetchSensorStream(_ sensorID: SensorID, _ timeout: TimeInterval) async throws(APIClientError) -> AsyncThrowingStream<[MeasurementSSE], any Error>
     func updateSetting(_ value: CustomStringConvertible, for key: ServerSettingKey) async throws(APIClientError)
     func fetchSensors() async throws(APIClientError) -> [Sensor]
+    func updateServerDomain(_ serverDomain: ServerDomain)
 }
 
-final class APIClientImpl: APIClient {
+nonisolated final class APIClientImpl: APIClient {
     private let session: URLSession
-    let server: ServerDomain
     let delegateQueue = OperationQueue()
+    let serverDomainMutex: Mutex<String>
+    
+    var server: ServerDomain {
+        serverDomainMutex.withLock { $0 }
+    }
 
     init(server: ServerDomain) {
-        self.server = server
+        self.serverDomainMutex = Mutex(server)
         let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 5
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         delegateQueue.name = "com.apiclient.network"
         session = URLSession(configuration: configuration, delegate: nil, delegateQueue: delegateQueue)
@@ -178,10 +185,10 @@ final class APIClientImpl: APIClient {
             let measurements: [SensorMeasurement]
             
             enum CodingKeys: String, CodingKey {
+                case measurements
                 case sensorId = "sensor_id"
                 case sensorName = "sensor_name"
                 case lastSeen = "last_seen_time"
-                case measurements
             }
         }
         
@@ -199,5 +206,9 @@ final class APIClientImpl: APIClient {
                 throw .server("Server error. Try again later")
             }
         }
+    }
+    
+    func updateServerDomain(_ new: ServerDomain) {
+        serverDomainMutex.withLock { $0 = new }
     }
 }

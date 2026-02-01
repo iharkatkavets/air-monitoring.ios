@@ -33,20 +33,20 @@ struct SensorLiveListView: View {
         .refreshable {
             await viewModel.refresh()
         }
-        .onAppear(perform: viewModel.viewDidTriggerOnAppear)
+        .task{ await viewModel.viewDidTriggerOnAppear() }
         .overlay(content: {
             if viewModel.isLoading {
                 ProgressView()
             }
         })
         .overlay {
-            if !viewModel.isLoading, let error = viewModel.errorMessage {
+            if let error = viewModel.errorMessage {
                 ContentUnavailableView(
                     "\(error)",
                     systemImage: "icloud.slash.fill",
                     description: nil)
             }
-            else if !viewModel.isLoading, viewModel.displaySensors.isEmpty {
+            else if case .loaded(let displaySensors) = viewModel.state, displaySensors.isEmpty {
                 ContentUnavailableView(
                     "No available sensors",
                     systemImage: "exclamationmark.warninglight.fill",

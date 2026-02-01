@@ -9,8 +9,8 @@ import SwiftUI
 import MarkdownUI
 import Collections
 
-struct ChartsScreen: View {
-    @State var viewModel: ChartsScreenViewModel
+struct SelectedChartsView: View {
+    @State var viewModel: SelectedChartsViewModel
     @State var isNumberConentrationInfoPresented = false
     @State var isMassConcentrationInfoPresented = false
     @State var toobarButtonRect: CGRect = .zero
@@ -81,8 +81,6 @@ struct ChartsScreen: View {
         }
     }
     
-    
-    
     @ViewBuilder
     private func errorViewIfNeeded() -> some View {
         if let errorMessage = viewModel.errorMessage {
@@ -97,5 +95,5 @@ struct ChartsScreen: View {
 }
 
 #Preview {
-    ChartsScreen(viewModel: ChartsScreenViewModel())
+    SelectedChartsView(viewModel: SelectedChartsViewModel())
 }

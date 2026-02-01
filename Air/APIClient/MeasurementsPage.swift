@@ -7,7 +7,7 @@
 
 typealias NextPageCursor = String
 
-struct MeasurementsPage: Decodable {
+nonisolated struct MeasurementsPage: Decodable {
     let measurements: [MeasurementData]
     let hasMore: Bool
     let nextPageCursor: NextPageCursor?

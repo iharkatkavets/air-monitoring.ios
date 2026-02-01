@@ -23,22 +23,18 @@ final class SensorHistoryListViewModel {
     @ObservationIgnored
     private var domainUpdatedTask: Task<Void, Never>?
 
-    init() {
-        domainUpdatedTask = Task { [weak self] in
-            let notificationCenter = NotificationCenter.default
-            for await _ in notificationCenter.notifications(named: .domainUpdated, object: nil) {
-                await self?.refresh()
-            }
-        }
-    }
+    init() { }
     
     deinit {
         domainUpdatedTask?.cancel()
     }
     
     func viewDidTriggerOnAppear() {
-        Task {
-            await fetchSensors()
+        domainUpdatedTask = Task { [weak self] in
+            let notificationCenter = NotificationCenter.default
+            for await _ in notificationCenter.notifications(named: .domainUpdated, object: nil) {
+                await self?.refresh()
+            }
         }
     }
     

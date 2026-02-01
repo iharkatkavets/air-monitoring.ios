@@ -10,14 +10,17 @@ import Foundation
 import Collections
 
 @Observable
-final class ChartsScreenViewModel {
+final class SelectedChartsViewModel {
     struct Section: Identifiable {
         let id: SectionID
         let sensorID: SensorID
         let chartsCount: Int
         let viewModel: ChartsGroupViewModel
     }
-    var isLoading = true
+    enum State {
+        case idle
+        case loaded
+    }
     var errorMessage: String? = nil
     var sensorsListPopupIsPresented: Bool = false
     @ObservationIgnored
@@ -30,17 +33,18 @@ final class ChartsScreenViewModel {
     var sections = [Section]()
     @ObservationIgnored
     var heightPerChart: CGFloat = 300.0
+    private var state = State.idle
 
     init() { }
     
     func viewDidTriggerOnAppear() {
-        guard sections.isEmpty else {
+        guard case .idle = state else {
             return
         }
-        
         for section in ChartsConfigStorage.load() {
             addSection(section.id, section.sensorID, section.measurements)
         }
+        state = .loaded
     }
     
     func refresh() async {
@@ -69,6 +73,7 @@ final class ChartsScreenViewModel {
             sensorID,
             measurements,
             heightPerChart: heightPerChart,
+            apiClient: APIClientImpl(server: AppSettings.serverDomain),
             onDeleteMeasurementAction: { measurement in
                 ChartsConfigStorage.removeMeasurement(measurement, in: sectionID)
             },
